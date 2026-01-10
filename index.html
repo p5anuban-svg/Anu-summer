@@ -585,6 +585,14 @@
             color: #ddd;
         }
 
+        .btn-disabled {
+            background-color: #cccccc !important;
+            color: #666666 !important;
+            cursor: not-allowed !important;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
         @media (max-width: 768px) {
             .seats-grid {
                 grid-template-columns: repeat(5, 1fr);
@@ -792,6 +800,15 @@
         </div>
     </div>
 
+    <!-- Loading Modal -->
+    <div id="loading-modal" class="modal">
+        <div class="modal-content" style="text-align: center;">
+            <div class="loading" style="width: 40px; height: 40px; margin: 20px auto;"></div>
+            <h3>กำลังดำเนินการ...</h3>
+            <p id="loading-text">กำลังตรวจสอบที่นั่งและบันทึกข้อมูล</p>
+        </div>
+    </div>
+
     <script>
         // Firebase Configuration
         const firebaseConfig = {
@@ -814,6 +831,7 @@
         let bookings = {};
         let isConnected = false;
         let lastUpdateTime = null;
+        let isProcessingBooking = false; // ป้องกันการกดยืนยันหลายครั้ง
 
         // DOM Elements
         const tabButtons = document.querySelectorAll('.tab-button');
@@ -836,8 +854,10 @@
         const connectionStatus = document.getElementById('connection-status');
         const lastUpdateElement = document.getElementById('last-update');
         const messageModal = document.getElementById('message-modal');
+        const loadingModal = document.getElementById('loading-modal');
         const messageTitle = document.getElementById('message-title');
         const messageText = document.getElementById('message-text');
+        const loadingText = document.getElementById('loading-text');
         const closeMessageBtn = document.getElementById('close-message');
         const btnCloseMessage = document.getElementById('btn-close-message');
 
@@ -961,7 +981,6 @@
             db.collection('courses').onSnapshot(snapshot => {
                 if (!isConnected) return;
                 
-                console.log('Courses updated:', snapshot.size, 'courses');
                 courses = {};
                 snapshot.forEach(doc => {
                     courses[doc.id] = doc.data();
@@ -976,7 +995,6 @@
             db.collection('bookings').onSnapshot(snapshot => {
                 if (!isConnected) return;
                 
-                console.log('Bookings updated:', snapshot.size, 'bookings');
                 bookings = {};
                 snapshot.forEach(doc => {
                     bookings[doc.id] = { id: doc.id, ...doc.data() };
@@ -1245,8 +1263,42 @@
             renderSeats();
         }
 
-        // Confirm Booking
+        // ฟังก์ชันป้องกันการจองซ้ำ - ใช้ Transaction
+        async function reserveSeatWithTransaction(courseId, seatNumber, studentName, studentClass, bookingTime, bookingDate) {
+            return await db.runTransaction(async (transaction) => {
+                // ตรวจสอบว่าที่นั่งว่างจริงหรือไม่
+                const seatCheckQuery = db.collection('bookings')
+                    .where('courseId', '==', courseId)
+                    .where('seatNumber', '==', seatNumber);
+                
+                const seatCheckSnapshot = await transaction.get(seatCheckQuery);
+                
+                if (!seatCheckSnapshot.empty) {
+                    throw new Error(`ที่นั่ง ${seatNumber} ถูกจองไปแล้ว`);
+                }
+                
+                // สร้างการจองใหม่
+                const bookingRef = db.collection('bookings').doc();
+                transaction.set(bookingRef, {
+                    courseId: courseId,
+                    seatNumber: seatNumber,
+                    studentName: studentName,
+                    studentClass: studentClass,
+                    bookingTime: bookingTime,
+                    bookingDate: bookingDate
+                });
+                
+                return bookingRef.id;
+            });
+        }
+
+        // Confirm Booking - แก้ไขเพื่อป้องกันการจองซ้ำ
         async function confirmBooking() {
+            if (isProcessingBooking) {
+                showMessage('กำลังดำเนินการ', 'กรุณารอสักครู่ กำลังดำเนินการจอง...');
+                return;
+            }
+            
             if (!isConnected) {
                 showMessage('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้');
                 return;
@@ -1278,68 +1330,124 @@
             }
             
             try {
-                // Check if seats are still available
+                // ป้องกันการกดยืนยันหลายครั้ง
+                isProcessingBooking = true;
+                confirmBookingBtn.disabled = true;
+                confirmBookingBtn.classList.add('btn-disabled');
+                
+                // แสดง loading
+                loadingText.textContent = 'กำลังตรวจสอบที่นั่ง...';
+                loadingModal.classList.add('active');
+                
+                const bookingTime = new Date().toISOString();
+                const bookingDate = new Date().toISOString().split('T')[0];
+                const bookingIds = [];
+                const failedSeats = [];
+                
+                // จองที่นั่งแต่ละตัวด้วย Transaction
                 for (const seatNumber of selectedSeats) {
-                    const snapshot = await db.collection('bookings')
-                        .where('courseId', '==', selectedCourse)
-                        .where('seatNumber', '==', seatNumber)
-                        .get();
-                    
-                    if (!snapshot.empty) {
-                        showMessage('ข้อผิดพลาด', 
-                            `ที่นั่ง ${seatNumber} ถูกจองไปแล้ว\n` +
-                            `กรุณาเลือกที่นั่งอื่น`
+                    try {
+                        loadingText.textContent = `กำลังตรวจสอบที่นั่ง ${seatNumber}...`;
+                        
+                        // ใช้ Transaction เพื่อป้องกันการจองซ้ำ
+                        const bookingId = await reserveSeatWithTransaction(
+                            selectedCourse,
+                            seatNumber,
+                            studentName,
+                            studentClass,
+                            bookingTime,
+                            bookingDate
                         );
-                        renderSeats();
-                        return;
+                        
+                        bookingIds.push({ seatNumber, bookingId });
+                        
+                    } catch (error) {
+                        console.error(`Error reserving seat ${seatNumber}:`, error);
+                        failedSeats.push({
+                            seatNumber: seatNumber,
+                            error: error.message
+                        });
                     }
                 }
                 
-                // Create bookings
-                const bookingTime = new Date().toISOString();
-                const bookingDate = new Date().toISOString().split('T')[0];
+                // ปิด loading modal
+                loadingModal.classList.remove('active');
                 
-                const batch = db.batch();
-                for (const seatNumber of selectedSeats) {
-                    const bookingRef = db.collection('bookings').doc();
-                    batch.set(bookingRef, {
-                        courseId: selectedCourse,
-                        seatNumber: seatNumber,
-                        studentName: studentName,
-                        studentClass: studentClass,
-                        bookingTime: bookingTime,
-                        bookingDate: bookingDate
-                    });
+                // แสดงผลลัพธ์
+                if (failedSeats.length === 0) {
+                    // จองทั้งหมดสำเร็จ
+                    const seatsList = selectedSeats.join(', ');
+                    showMessage('สำเร็จ', 
+                        `จองที่นั่ง ${seatsList} สำเร็จ!\n\n` +
+                        `ชื่อ: ${studentName}\n` +
+                        `ห้องเรียน: ${studentClass}\n` +
+                        `วิชา: ${selectedCourse}\n` +
+                        `หมายเลขการจอง: ${bookingIds[0].bookingId.substring(0, 8)}\n\n` +
+                        `โปรดบันทึกข้อมูลนี้ไว้`
+                    );
+                    
+                    // Reset form
+                    selectedSeats = [];
+                    selectedSeatsDisplay.textContent = 'ยังไม่มีการเลือกที่นั่ง';
+                    selectedSeatsDisplay.style.background = '#e8f0fe';
+                    selectedSeatsDisplay.style.color = '#1a73e8';
+                    studentNameInput.value = '';
+                    studentClassInput.value = '';
+                    
+                    // Force update display
+                    renderCourses();
+                    renderSeats();
+                    
+                } else if (bookingIds.length > 0) {
+                    // บางที่นั่งจองสำเร็จ บางที่นั่งไม่สำเร็จ
+                    const successSeats = bookingIds.map(b => b.seatNumber).join(', ');
+                    const failedSeatsList = failedSeats.map(f => f.seatNumber).join(', ');
+                    
+                    showMessage('มีบางที่นั่งไม่สำเร็จ', 
+                        `จองสำเร็จ: ที่นั่ง ${successSeats}\n` +
+                        `ไม่สำเร็จ: ที่นั่ง ${failedSeatsList}\n\n` +
+                        `ชื่อ: ${studentName}\n` +
+                        `ห้องเรียน: ${studentClass}\n` +
+                        `วิชา: ${selectedCourse}\n\n` +
+                        `กรุณาลองเลือกที่นั่งอื่นหรือติดต่อผู้ดูแล`
+                    );
+                    
+                    // อัพเดทที่นั่งที่เลือกใหม่ (เฉพาะที่นั่งที่จองไม่ได้)
+                    selectedSeats = failedSeats.map(f => f.seatNumber);
+                    if (selectedSeats.length > 0) {
+                        selectedSeatsDisplay.textContent = selectedSeats.join(', ');
+                    } else {
+                        selectedSeatsDisplay.textContent = 'ยังไม่มีการเลือกที่นั่ง';
+                    }
+                    
+                    renderSeats();
+                    
+                } else {
+                    // ไม่มีที่นั่งใดจองสำเร็จเลย
+                    const errorMessages = failedSeats.map(f => `ที่นั่ง ${f.seatNumber}: ${f.error}`).join('\n');
+                    showMessage('การจองไม่สำเร็จ', 
+                        `ไม่สามารถจองที่นั่งได้:\n\n` +
+                        errorMessages + '\n\n' +
+                        `กรุณาเลือกที่นั่งใหม่และลองอีกครั้ง`
+                    );
+                    
+                    renderSeats();
                 }
                 
-                await batch.commit();
-                
-                showMessage('สำเร็จ', 
-                    `จองที่นั่ง ${selectedSeats.join(', ')} สำเร็จ!\n\n` +
-                    `ชื่อ: ${studentName}\n` +
-                    `ห้องเรียน: ${studentClass}\n` +
-                    `วิชา: ${selectedCourse}\n\n` +
-                    `โปรดบันทึกข้อมูลนี้ไว้`
-                );
-                
-                // Reset form
-                selectedSeats = [];
-                selectedSeatsDisplay.textContent = 'ยังไม่มีการเลือกที่นั่ง';
-                selectedSeatsDisplay.style.background = '#e8f0fe';
-                selectedSeatsDisplay.style.color = '#1a73e8';
-                studentNameInput.value = '';
-                studentClassInput.value = '';
-                
-                // Force update display
-                renderCourses();
-                renderSeats();
-                
             } catch (error) {
-                console.error('Error confirming booking:', error);
+                console.error('Error in confirmBooking:', error);
+                loadingModal.classList.remove('active');
                 showMessage('ข้อผิดพลาด', 
-                    'ไม่สามารถบันทึกการจองได้\n\n' +
-                    'ข้อผิดพลาด: ' + error.message
+                    'เกิดข้อผิดพลาดในการจอง\n\n' +
+                    'ข้อผิดพลาด: ' + error.message + '\n\n' +
+                    'กรุณาลองใหม่อีกครั้ง'
                 );
+                
+            } finally {
+                // เปิดใช้งานปุ่มยืนยันอีกครั้ง
+                isProcessingBooking = false;
+                confirmBookingBtn.disabled = false;
+                confirmBookingBtn.classList.remove('btn-disabled');
             }
         }
 
