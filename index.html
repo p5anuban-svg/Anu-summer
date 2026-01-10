@@ -21,6 +21,7 @@
             --reserving-light: #ff9c7a;
             --gray: #5f6368;
             --light-gray: #f5f7fa;
+            --error: #ea4335;
         }
         
         * {
@@ -250,6 +251,14 @@
 
         .btn-danger:hover {
             background-color: #333333;
+        }
+
+        .btn-error {
+            background-color: var(--error);
+        }
+
+        .btn-error:hover {
+            background-color: #c23325;
         }
 
         .booking-container {
@@ -699,6 +708,19 @@
             display: block;
         }
 
+        .error-box {
+            background: #fdecea;
+            border: 2px solid var(--error);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-box.active {
+            display: block;
+        }
+
         @media (max-width: 768px) {
             .seats-grid {
                 grid-template-columns: repeat(5, 1fr);
@@ -780,6 +802,12 @@
                 <p id="reservation-details">กรุณารอสักครู่ก่อนเลือกที่นั่ง</p>
             </div>
             
+            <!-- ข้อความแสดงข้อผิดพลาด -->
+            <div class="error-box" id="error-box">
+                <h4><i class="fas fa-exclamation-circle" style="color: var(--error);"></i> เกิดข้อผิดพลาด</h4>
+                <p id="error-details"></p>
+            </div>
+            
             <div class="booking-container">
                 <div class="seats-section">
                     <div class="screen">หน้าห้องเรียน</div>
@@ -842,6 +870,9 @@
                         </button>
                         <button class="btn btn-secondary" id="back-to-courses">
                             <i class="fas fa-arrow-left"></i> กลับหน้าแรก
+                        </button>
+                        <button class="btn btn-error" id="btn-debug" style="display: none;">
+                            <i class="fas fa-bug"></i> แก้ไขปัญหา
                         </button>
                     </div>
                     
@@ -927,6 +958,9 @@
                 <a href="admin.html" class="btn" style="padding: 15px 30px;">
                     <i class="fas fa-user-shield"></i> ไปที่หน้าผู้ดูแลระบบ
                 </a>
+                <button class="btn btn-warning" id="btn-setup-db" style="padding: 15px 30px;">
+                    <i class="fas fa-database"></i> ตั้งค่าฐานข้อมูล
+                </button>
             </div>
         </div>
 
@@ -960,7 +994,7 @@
     </div>
 
     <script>
-        // Firebase Configuration
+        // Firebase Configuration - FIXED VERSION
         const firebaseConfig = {
             apiKey: "AIzaSyAIawhBmDnJs2rfAoThFFG-8llvIk1--aU",
             authDomain: "exam-test-ac-me.firebaseapp.com",
@@ -971,8 +1005,17 @@
         };
 
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore(app);
+        
+        // Enable debug mode if URL has ?debug=1
+        const urlParams = new URLSearchParams(window.location.search);
+        const debugMode = urlParams.get('debug') === '1';
+        
+        if (debugMode) {
+            console.log("Debug mode enabled");
+            document.getElementById('btn-debug').style.display = 'inline-block';
+        }
 
         // Global Variables
         let selectedCourse = null;
@@ -1025,6 +1068,10 @@
         const loadingText = document.getElementById('loading-text');
         const closeMessageBtn = document.getElementById('close-message');
         const btnCloseMessage = document.getElementById('btn-close-message');
+        const errorBox = document.getElementById('error-box');
+        const errorDetails = document.getElementById('error-details');
+        const btnDebug = document.getElementById('btn-debug');
+        const btnSetupDb = document.getElementById('btn-setup-db');
 
         // Event Listeners
         document.addEventListener('DOMContentLoaded', initializeApp);
@@ -1044,11 +1091,8 @@
         confirmBookingBtn.addEventListener('click', confirmBooking);
         closeMessageBtn.addEventListener('click', closeMessage);
         btnCloseMessage.addEventListener('click', closeMessage);
-
-        // Prevent default behavior for admin links
-        document.querySelectorAll('a[href="#"]').forEach(link => {
-            link.addEventListener('click', (e) => e.preventDefault());
-        });
+        btnDebug.addEventListener('click', showDebugInfo);
+        btnSetupDb.addEventListener('click', setupDatabase);
 
         // Initialize App
         async function initializeApp() {
@@ -1065,9 +1109,6 @@
                 updateConnectionStatus('เชื่อมต่อกับฐานข้อมูลสำเร็จ', 'connected');
                 isConnected = true;
                 
-                // Initialize sample data if empty
-                await initializeSampleData();
-                
                 // Setup real-time listeners
                 setupRealtimeListeners();
                 
@@ -1078,77 +1119,137 @@
                 // Start cleanup interval
                 setInterval(cleanupExpiredReservations, CLEANUP_INTERVAL);
                 
+                // Check if database needs setup
+                await checkDatabaseSetup();
+                
             } catch (error) {
                 console.error("Connection error:", error);
                 updateConnectionStatus('เชื่อมต่อกับฐานข้อมูลล้มเหลว', 'disconnected');
                 isConnected = false;
                 
-                // Show error message
-                showMessage('ข้อผิดพลาด', 
+                // Show detailed error
+                showError('การเชื่อมต่อล้มเหลว', 
                     'ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้\n\n' +
+                    'สาเหตุ: ' + error.message + '\n\n' +
                     'กรุณาตรวจสอบ:\n' +
                     '1. การเชื่อมต่ออินเทอร์เน็ต\n' +
-                    '2. Firebase Security Rules\n' +
-                    '3. โปรเจค Firebase Configuration'
+                    '2. Firebase Project Configuration\n' +
+                    '3. หรือกดปุ่ม "ตั้งค่าฐานข้อมูล"'
                 );
+                
+                // Enable setup button
+                if (btnSetupDb) btnSetupDb.style.display = 'inline-block';
             }
         }
 
-        // Initialize Sample Data
-        async function initializeSampleData() {
+        // Check Database Setup
+        async function checkDatabaseSetup() {
             try {
-                const coursesSnapshot = await db.collection('courses').get();
+                const coursesSnapshot = await db.collection('courses').limit(1).get();
                 
                 if (coursesSnapshot.empty) {
-                    console.log('Creating sample courses...');
-                    
-                    const sampleCourses = [
-                        {
-                            id: 'CS101',
-                            data: {
-                                name: 'การเขียนโปรแกรมคอมพิวเตอร์',
-                                totalSeats: 30,
-                                instructor: 'อาจารย์สมชาย ใจดี',
-                                time: 'จันทร์ 09:00-12:00',
-                                description: 'วิชาพื้นฐานการเขียนโปรแกรมด้วยภาษา Python',
-                                createdAt: new Date().toISOString()
-                            }
-                        },
-                        {
-                            id: 'MATH201',
-                            data: {
-                                name: 'คณิตศาสตร์ดิสครีต',
-                                totalSeats: 25,
-                                instructor: 'อาจารย์สมหญิง เก่งกล้า',
-                                time: 'อังคาร 13:00-16:00',
-                                description: 'วิชาคณิตศาสตร์สำหรับนักคอมพิวเตอร์',
-                                createdAt: new Date().toISOString()
-                            }
-                        },
-                        {
-                            id: 'ENG102',
-                            data: {
-                                name: 'ภาษาอังกฤษเพื่อการสื่อสาร',
-                                totalSeats: 40,
-                                instructor: 'อาจารย์ John Smith',
-                                time: 'พุธ 10:00-13:00',
-                                description: 'พัฒนาทักษะภาษาอังกฤษเพื่อการสื่อสาร',
-                                createdAt: new Date().toISOString()
-                            }
-                        }
-                    ];
-                    
-                    const batch = db.batch();
-                    sampleCourses.forEach(course => {
-                        const courseRef = db.collection('courses').doc(course.id);
-                        batch.set(courseRef, course.data);
-                    });
-                    
-                    await batch.commit();
-                    console.log('Sample courses created successfully');
+                    showMessage('คำแนะนำ', 
+                        'ระบบยังไม่มีข้อมูลวิชา\n\n' +
+                        'กรุณา:\n' +
+                        '1. ไปที่หน้า "ผู้ดูแลระบบ"\n' +
+                        '2. เพิ่มวิชาใหม่\n' +
+                        'หรือกดปุ่ม "ตั้งค่าฐานข้อมูล" เพื่อสร้างข้อมูลตัวอย่าง'
+                    );
                 }
             } catch (error) {
-                console.error('Error initializing sample data:', error);
+                console.error('Error checking database:', error);
+            }
+        }
+
+        // Setup Database (สร้างข้อมูลตัวอย่าง)
+        async function setupDatabase() {
+            loadingText.textContent = 'กำลังตั้งค่าฐานข้อมูล...';
+            loadingModal.classList.add('active');
+            
+            try {
+                // สร้าง collection test
+                await db.collection('test_setup').add({
+                    timestamp: new Date().toISOString(),
+                    action: 'database_setup'
+                });
+                
+                // สร้างข้อมูลตัวอย่าง
+                const sampleCourses = [
+                    {
+                        id: 'CS101',
+                        name: 'การเขียนโปรแกรมคอมพิวเตอร์',
+                        totalSeats: 30,
+                        instructor: 'อาจารย์สมชาย ใจดี',
+                        time: 'จันทร์ 09:00-12:00',
+                        description: 'วิชาพื้นฐานการเขียนโปรแกรมด้วยภาษา Python',
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: 'MATH201',
+                        name: 'คณิตศาสตร์ดิสครีต',
+                        totalSeats: 25,
+                        instructor: 'อาจารย์สมหญิง เก่งกล้า',
+                        time: 'อังคาร 13:00-16:00',
+                        description: 'วิชาคณิตศาสตร์สำหรับนักคอมพิวเตอร์',
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: 'ENG102',
+                        name: 'ภาษาอังกฤษเพื่อการสื่อสาร',
+                        totalSeats: 40,
+                        instructor: 'อาจารย์ John Smith',
+                        time: 'พุธ 10:00-13:00',
+                        description: 'พัฒนาทักษะภาษาอังกฤษเพื่อการสื่อสาร',
+                        createdAt: new Date().toISOString()
+                    }
+                ];
+                
+                // สร้าง collection หลัก
+                const collections = ['courses', 'bookings', 'seat_reservations'];
+                for (const collectionName of collections) {
+                    const collectionRef = db.collection(collectionName);
+                    const snapshot = await collectionRef.limit(1).get();
+                    if (snapshot.empty) {
+                        console.log(`Creating collection: ${collectionName}`);
+                    }
+                }
+                
+                // เพิ่มข้อมูลตัวอย่าง
+                for (const course of sampleCourses) {
+                    await db.collection('courses').doc(course.id).set({
+                        name: course.name,
+                        totalSeats: course.totalSeats,
+                        instructor: course.instructor,
+                        time: course.time,
+                        description: course.description,
+                        createdAt: course.createdAt
+                    });
+                }
+                
+                loadingModal.classList.remove('active');
+                showMessage('สำเร็จ', 
+                    'ตั้งค่าฐานข้อมูลสำเร็จ!\n\n' +
+                    'สร้างข้อมูลตัวอย่าง:\n' +
+                    '- วิชา CS101: การเขียนโปรแกรมคอมพิวเตอร์\n' +
+                    '- วิชา MATH201: คณิตศาสตร์ดิสครีต\n' +
+                    '- วิชา ENG102: ภาษาอังกฤษเพื่อการสื่อสาร\n\n' +
+                    'ระบบพร้อมใช้งานแล้ว'
+                );
+                
+                // โหลดข้อมูลใหม่
+                await loadCourses();
+                
+            } catch (error) {
+                console.error('Setup error:', error);
+                loadingModal.classList.remove('active');
+                showError('ตั้งค่าฐานข้อมูลล้มเหลว', 
+                    'ไม่สามารถตั้งค่าฐานข้อมูลได้\n\n' +
+                    'สาเหตุ: ' + error.message + '\n\n' +
+                    'กรุณาตรวจสอบ:\n' +
+                    '1. Firebase Security Rules\n' +
+                    '2. Project Configuration\n' +
+                    '3. Internet Connection'
+                );
             }
         }
 
@@ -1160,12 +1261,13 @@
                 
                 courses = {};
                 snapshot.forEach(doc => {
-                    courses[doc.id] = doc.data();
+                    courses[doc.id] = { id: doc.id, ...doc.data() };
                 });
                 renderCourses();
                 updateLastUpdateTime();
             }, error => {
                 console.error('Courses listener error:', error);
+                showError('Courses listener error', error.message);
             });
 
             // Listen for booking changes
@@ -1183,6 +1285,7 @@
                 updateLastUpdateTime();
             }, error => {
                 console.error('Bookings listener error:', error);
+                showError('Bookings listener error', error.message);
             });
 
             // Listen for seat reservations - REAL-TIME UPDATES
@@ -1224,6 +1327,7 @@
                 updateLastUpdateTime();
             }, error => {
                 console.error('Seat reservations listener error:', error);
+                showError('Reservations listener error', error.message);
             });
         }
 
@@ -1250,6 +1354,21 @@
             }
         }
 
+        // Show Error Box
+        function showError(title, message) {
+            if (errorBox && errorDetails) {
+                errorBox.classList.add('active');
+                errorDetails.innerHTML = `<strong>${title}:</strong> ${message.replace(/\n/g, '<br>')}`;
+            }
+        }
+
+        // Hide Error Box
+        function hideError() {
+            if (errorBox) {
+                errorBox.classList.remove('active');
+            }
+        }
+
         // Cleanup expired reservations
         async function cleanupExpiredReservations() {
             if (!isConnected) return;
@@ -1259,6 +1378,8 @@
                 const snapshot = await db.collection('seat_reservations').get();
                 
                 const batch = db.batch();
+                let deletedCount = 0;
+                
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     const reservationTime = new Date(data.reservedAt);
@@ -1266,11 +1387,13 @@
                     
                     if (timeDiff >= RESERVATION_TIMEOUT_SECONDS) {
                         batch.delete(doc.ref);
+                        deletedCount++;
                     }
                 });
                 
-                if (snapshot.size > 0) {
+                if (deletedCount > 0) {
                     await batch.commit();
+                    if (debugMode) console.log(`Cleaned up ${deletedCount} expired reservations`);
                 }
             } catch (error) {
                 console.error('Error cleaning up expired reservations:', error);
@@ -1279,11 +1402,13 @@
 
         // Update Connection Status
         function updateConnectionStatus(text, status) {
-            connectionStatus.innerHTML = `
-                <i class="fas fa-circle"></i>
-                <span>${text}</span>
-            `;
-            connectionStatus.className = `connection-status ${status}`;
+            if (connectionStatus) {
+                connectionStatus.innerHTML = `
+                    <i class="fas fa-circle"></i>
+                    <span>${text}</span>
+                `;
+                connectionStatus.className = `connection-status ${status}`;
+            }
         }
 
         // Update Last Update Time
@@ -1303,6 +1428,9 @@
             tabContents.forEach(content => {
                 content.classList.toggle('active', content.id === tabId);
             });
+            
+            // ซ่อนข้อความ error เมื่อเปลี่ยน tab
+            hideError();
         }
 
         // Load Courses
@@ -1313,11 +1441,12 @@
                 const snapshot = await db.collection('courses').get();
                 courses = {};
                 snapshot.forEach(doc => {
-                    courses[doc.id] = doc.data();
+                    courses[doc.id] = { id: doc.id, ...doc.data() };
                 });
                 renderCourses();
             } catch (error) {
                 console.error('Error loading courses:', error);
+                showError('Load Courses Error', error.message);
             }
         }
 
@@ -1333,11 +1462,14 @@
                 });
             } catch (error) {
                 console.error('Error loading bookings:', error);
+                showError('Load Bookings Error', error.message);
             }
         }
 
         // Render Courses
         function renderCourses() {
+            if (!coursesList) return;
+            
             coursesList.innerHTML = '';
             
             if (Object.keys(courses).length === 0) {
@@ -1345,10 +1477,14 @@
                     <div class="empty-state">
                         <i class="fas fa-book"></i>
                         <h3>ยังไม่มีวิชาในระบบ</h3>
-                        <p>กำลังสร้างข้อมูลเริ่มต้น...</p>
-                        <div class="loading" style="margin: 20px auto;"></div>
+                        <p>กรุณาเพิ่มวิชาในหน้า "ผู้ดูแลระบบ"</p>
+                        <button class="btn btn-success" id="btn-create-sample" style="margin-top: 20px;">
+                            <i class="fas fa-plus"></i> สร้างข้อมูลตัวอย่าง
+                        </button>
                     </div>
                 `;
+                
+                document.getElementById('btn-create-sample')?.addEventListener('click', setupDatabase);
                 return;
             }
             
@@ -1412,7 +1548,7 @@
         // Select Course
         function selectCourse(courseId) {
             if (!isConnected) {
-                showMessage('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้');
+                showError('การเชื่อมต่อ', 'ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้');
                 return;
             }
             
@@ -1420,7 +1556,7 @@
             const course = courses[courseId];
             
             if (!course) {
-                showMessage('ข้อผิดพลาด', 'ไม่พบข้อมูลวิชา');
+                showError('ไม่พบข้อมูล', 'ไม่พบข้อมูลวิชา');
                 return;
             }
             
@@ -1443,13 +1579,14 @@
             
             clearReservation();
             confirmationBox.classList.remove('active');
+            hideError();
             
             renderSeats();
         }
 
         // Render Seats - WITH REAL-TIME RESERVATION UPDATES
         function renderSeats() {
-            if (!selectedCourse || !isConnected) return;
+            if (!selectedCourse || !isConnected || !seatsContainer) return;
             
             const course = courses[selectedCourse];
             if (!course) return;
@@ -1493,7 +1630,9 @@
             }
             
             const availableSeats = course.totalSeats - bookedCount;
-            availableSeatsCountElement.textContent = availableSeats;
+            if (availableSeatsCountElement) {
+                availableSeatsCountElement.textContent = availableSeats;
+            }
             
             for (let i = 1; i <= course.totalSeats; i++) {
                 const seat = document.createElement('div');
@@ -1526,7 +1665,7 @@
         function getUserId() {
             let userId = localStorage.getItem('user_id');
             if (!userId) {
-                userId = 'user_' + Math.random().toString(36).substr(2, 9);
+                userId = 'user_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
                 localStorage.setItem('user_id', userId);
             }
             return userId;
@@ -1535,7 +1674,7 @@
         // Select Seat
         async function selectSeat(seatNumber) {
             if (!isConnected) {
-                showMessage('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้');
+                showError('การเชื่อมต่อ', 'ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้');
                 return;
             }
             
@@ -1600,8 +1739,11 @@
                     expiresAt: new Date(Date.now() + RESERVATION_TIMEOUT_SECONDS * 1000).toISOString()
                 });
                 
+                if (debugMode) console.log(`Reserved seat ${seatNumber} for course ${selectedCourse}`);
+                
             } catch (error) {
                 console.error('Error creating seat reservation:', error);
+                showError('Reservation Error', error.message);
             }
         }
 
@@ -1610,13 +1752,18 @@
             try {
                 const reservationId = `${selectedCourse}_${seatNumber}_${getUserId()}`;
                 await db.collection('seat_reservations').doc(reservationId).delete();
+                
+                if (debugMode) console.log(`Released seat ${seatNumber} for course ${selectedCourse}`);
             } catch (error) {
                 console.error('Error deleting seat reservation:', error);
+                showError('Delete Reservation Error', error.message);
             }
         }
 
         // อัพเดทการแสดงผล
         function updateSelectedSeatsDisplay() {
+            if (!selectedSeatsDisplay) return;
+            
             if (selectedSeats.length > 0) {
                 selectedSeatsDisplay.textContent = selectedSeats.join(', ');
                 selectedSeatsDisplay.style.background = '#e8f4ea';
@@ -1624,7 +1771,9 @@
                 selectedSeatsDisplay.style.fontWeight = 'bold';
                 selectedSeatsDisplay.style.borderColor = '#34a853';
                 
-                reservationTimeoutElement.style.display = 'flex';
+                if (reservationTimeoutElement) {
+                    reservationTimeoutElement.style.display = 'flex';
+                }
                 confirmationBox.classList.add('active');
             } else {
                 selectedSeatsDisplay.textContent = 'ยังไม่มีการเลือกที่นั่ง';
@@ -1633,7 +1782,9 @@
                 selectedSeatsDisplay.style.fontWeight = 'normal';
                 selectedSeatsDisplay.style.borderColor = '#34a853';
                 
-                reservationTimeoutElement.style.display = 'none';
+                if (reservationTimeoutElement) {
+                    reservationTimeoutElement.style.display = 'none';
+                }
                 confirmationBox.classList.remove('active');
             }
         }
@@ -1644,11 +1795,15 @@
             clearInterval(reservationTimer);
             
             let timeLeft = RESERVATION_TIMEOUT_SECONDS;
-            timeoutCountdownElement.textContent = timeLeft;
+            if (timeoutCountdownElement) {
+                timeoutCountdownElement.textContent = timeLeft;
+            }
             
             reservationTimer = setInterval(() => {
                 timeLeft--;
-                timeoutCountdownElement.textContent = timeLeft;
+                if (timeoutCountdownElement) {
+                    timeoutCountdownElement.textContent = timeLeft;
+                }
                 
                 if (timeLeft <= 0) {
                     clearReservation();
@@ -1675,7 +1830,9 @@
             clearTimeout(reservationTimeout);
             clearInterval(reservationTimer);
             
-            reservationTimeoutElement.style.display = 'none';
+            if (reservationTimeoutElement) {
+                reservationTimeoutElement.style.display = 'none';
+            }
             confirmationBox.classList.remove('active');
             
             if (selectedCourse) {
@@ -1683,38 +1840,7 @@
             }
         }
 
-        // ฟังก์ชันป้องกันการจองซ้ำ
-        async function reserveSeatWithTransaction(courseId, seatNumber, studentName, studentClass, bookingTime, bookingDate) {
-            return await db.runTransaction(async (transaction) => {
-                const seatCheckQuery = db.collection('bookings')
-                    .where('courseId', '==', courseId)
-                    .where('seatNumber', '==', seatNumber);
-                
-                const seatCheckSnapshot = await transaction.get(seatCheckQuery);
-                
-                if (!seatCheckSnapshot.empty) {
-                    throw new Error(`ที่นั่ง ${seatNumber} ถูกจองไปแล้ว`);
-                }
-                
-                const reservationId = `${courseId}_${seatNumber}_${getUserId()}`;
-                const reservationRef = db.collection('seat_reservations').doc(reservationId);
-                transaction.delete(reservationRef);
-                
-                const bookingRef = db.collection('bookings').doc();
-                transaction.set(bookingRef, {
-                    courseId: courseId,
-                    seatNumber: seatNumber,
-                    studentName: studentName,
-                    studentClass: studentClass,
-                    bookingTime: bookingTime,
-                    bookingDate: bookingDate
-                });
-                
-                return bookingRef.id;
-            });
-        }
-
-        // Confirm Booking
+        // Confirm Booking - FIXED VERSION
         async function confirmBooking() {
             if (isProcessingBooking) {
                 showMessage('กำลังดำเนินการ', 'กรุณารอสักครู่ กำลังดำเนินการจอง...');
@@ -1722,17 +1848,17 @@
             }
             
             if (!isConnected) {
-                showMessage('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้');
+                showError('การเชื่อมต่อ', 'ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้');
                 return;
             }
             
             if (!selectedCourse) {
-                showMessage('ข้อผิดพลาด', 'กรุณาเลือกวิชาก่อน');
+                showError('การเลือกวิชา', 'กรุณาเลือกวิชาก่อน');
                 return;
             }
             
             if (selectedSeats.length === 0) {
-                showMessage('ข้อผิดพลาด', 'กรุณาเลือกที่นั่งก่อน');
+                showError('การเลือกที่นั่ง', 'กรุณาเลือกที่นั่งก่อน');
                 return;
             }
             
@@ -1740,13 +1866,13 @@
             const studentClass = studentClassInput.value.trim();
             
             if (!studentName) {
-                showMessage('ข้อผิดพลาด', 'กรุณากรอกชื่อ-นามสกุล');
+                showError('ข้อมูลไม่ครบ', 'กรุณากรอกชื่อ-นามสกุล');
                 studentNameInput.focus();
                 return;
             }
             
             if (!studentClass) {
-                showMessage('ข้อผิดพลาด', 'กรุณากรอกห้องเรียน');
+                showError('ข้อมูลไม่ครบ', 'กรุณากรอกห้องเรียน');
                 studentClassInput.focus();
                 return;
             }
@@ -1764,20 +1890,37 @@
                 const bookingIds = [];
                 const failedSeats = [];
                 
+                // Process each seat individually
                 for (const seatNumber of selectedSeats) {
                     try {
                         loadingText.textContent = `กำลังตรวจสอบที่นั่ง ${seatNumber}...`;
                         
-                        const bookingId = await reserveSeatWithTransaction(
-                            selectedCourse,
-                            seatNumber,
-                            studentName,
-                            studentClass,
-                            bookingTime,
-                            bookingDate
-                        );
+                        // ตรวจสอบว่ามีการจองอยู่แล้วหรือไม่
+                        const existingBooking = await db.collection('bookings')
+                            .where('courseId', '==', selectedCourse)
+                            .where('seatNumber', '==', seatNumber)
+                            .get();
                         
-                        bookingIds.push({ seatNumber, bookingId });
+                        if (!existingBooking.empty) {
+                            throw new Error(`ที่นั่ง ${seatNumber} ถูกจองไปแล้ว`);
+                        }
+                        
+                        // ลบการจองชั่วคราว
+                        const reservationId = `${selectedCourse}_${seatNumber}_${getUserId()}`;
+                        await db.collection('seat_reservations').doc(reservationId).delete();
+                        
+                        // สร้างการจองใหม่
+                        const bookingRef = await db.collection('bookings').add({
+                            courseId: selectedCourse,
+                            seatNumber: seatNumber,
+                            studentName: studentName,
+                            studentClass: studentClass,
+                            bookingTime: bookingTime,
+                            bookingDate: bookingDate,
+                            createdAt: new Date().toISOString()
+                        });
+                        
+                        bookingIds.push({ seatNumber, bookingId: bookingRef.id });
                         
                     } catch (error) {
                         console.error(`Error reserving seat ${seatNumber}:`, error);
@@ -1840,11 +1983,18 @@
             } catch (error) {
                 console.error('Error in confirmBooking:', error);
                 loadingModal.classList.remove('active');
-                showMessage('ข้อผิดพลาด', 
-                    'เกิดข้อผิดพลาดในการจอง\n\n' +
-                    'ข้อผิดพลาด: ' + error.message + '\n\n' +
-                    'กรุณาลองใหม่อีกครั้ง'
-                );
+                
+                let errorMessage = 'เกิดข้อผิดพลาดในการจอง\n\n';
+                if (error.code === 'permission-denied') {
+                    errorMessage += 'สิทธิ์ไม่เพียงพอ: กรุณาตรวจสอบ Firebase Rules\n';
+                } else if (error.code === 'unavailable') {
+                    errorMessage += 'ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้\n';
+                } else {
+                    errorMessage += 'ข้อผิดพลาด: ' + error.message + '\n';
+                }
+                
+                errorMessage += '\nกรุณาลองใหม่อีกครั้งหรือติดต่อผู้ดูแล';
+                showError('การจองล้มเหลว', errorMessage);
                 
             } finally {
                 isProcessingBooking = false;
@@ -1853,16 +2003,45 @@
             }
         }
 
+        // Show Debug Info
+        function showDebugInfo() {
+            const debugInfo = `
+                Firebase Status:
+                - Connected: ${isConnected}
+                - Project ID: ${firebaseConfig.projectId}
+                
+                Application Status:
+                - Selected Course: ${selectedCourse || 'None'}
+                - Selected Seats: ${selectedSeats.join(', ') || 'None'}
+                - User ID: ${getUserId()}
+                - Active Users: ${activeUsers}
+                
+                Data Counts:
+                - Courses: ${Object.keys(courses).length}
+                - Bookings: ${Object.keys(bookings).length}
+                - Reservations: ${Object.keys(seatReservations).length}
+                
+                Last Update: ${lastUpdateTime ? lastUpdateTime.toLocaleTimeString() : 'Never'}
+            `;
+            
+            console.log('Debug Info:', debugInfo);
+            showMessage('Debug Information', debugInfo.replace(/\n/g, '<br>'));
+        }
+
         // Show Message
         function showMessage(title, text) {
-            messageTitle.textContent = title;
-            messageText.innerHTML = text.replace(/\n/g, '<br>');
-            messageModal.classList.add('active');
+            if (messageTitle && messageText) {
+                messageTitle.textContent = title;
+                messageText.innerHTML = text.replace(/\n/g, '<br>');
+                messageModal.classList.add('active');
+            }
         }
 
         // Close Message
         function closeMessage() {
-            messageModal.classList.remove('active');
+            if (messageModal) {
+                messageModal.classList.remove('active');
+            }
         }
     </script>
 </body>
