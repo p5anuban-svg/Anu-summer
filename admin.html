@@ -18,7 +18,7 @@
             --danger: #ea4335;
             --gray: #5f6368;
             --light-gray: #f5f7fa;
-            --booked: #000000; /* เพิ่มสีดำสำหรับสถานะจองแล้ว */
+            --booked: #000000;
         }
         
         * {
@@ -206,7 +206,7 @@
         }
 
         .btn-danger {
-            background-color: var(--booked); /* เปลี่ยนเป็นสีดำ */
+            background-color: var(--booked);
             color: white;
         }
 
@@ -327,8 +327,8 @@
         }
 
         .badge-booked {
-            background: #f0f0f0; /* สีพื้นหลังเทาอ่อนสำหรับสีดำ */
-            color: var(--booked); /* เปลี่ยนเป็นสีดำ */
+            background: #f0f0f0;
+            color: var(--booked);
             font-weight: bold;
         }
 
@@ -750,7 +750,7 @@
     </div>
 
     <script>
-        // Firebase Configuration (ต้องเหมือนกับหน้า index.html)
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAIawhBmDnJs2rfAoThFFG-8llvIk1--aU",
             authDomain: "exam-test-ac-me.firebaseapp.com",
@@ -760,7 +760,7 @@
             appId: "1:1064778433498:web:b57dd308fd48fdc57b76e3"
         };
 
-        // Initialize Firebase (ต้องใช้แอปเดียวกับหน้า index.html)
+        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
@@ -779,7 +779,6 @@
         // Real-time listeners
         let coursesListener = null;
         let bookingsListener = null;
-        let seatReservationsListener = null;
 
         // DOM Elements
         const loginSection = document.getElementById('login-section');
@@ -903,7 +902,6 @@
             // Stop any existing listeners
             if (coursesListener) coursesListener();
             if (bookingsListener) bookingsListener();
-            if (seatReservationsListener) seatReservationsListener();
             
             // Courses listener - REAL-TIME
             coursesListener = db.collection("courses").onSnapshot(snapshot => {
@@ -941,17 +939,6 @@
             }, error => {
                 console.error("Bookings listener error:", error);
                 updateConnectionStatus('การเชื่อมต่อถูกขัดจังหวะ', 'disconnected');
-            });
-
-            // Seat reservations listener - REAL-TIME
-            seatReservationsListener = db.collection("seat_reservations").onSnapshot(snapshot => {
-                if (!isConnected) return;
-                
-                // We don't need to store these, but we can use them to show real-time status
-                updateLastUpdateTime();
-                
-            }, error => {
-                console.error("Seat reservations listener error:", error);
             });
         }
 
@@ -1013,7 +1000,6 @@
             // Stop all real-time listeners
             if (coursesListener) coursesListener();
             if (bookingsListener) bookingsListener();
-            if (seatReservationsListener) seatReservationsListener();
             
             showLoginForm();
         }
