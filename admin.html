@@ -206,12 +206,12 @@
         }
 
         .btn-danger {
-            background-color: var(--booked);
+            background-color: var(--danger);
             color: white;
         }
 
         .btn-danger:hover {
-            background-color: #333333;
+            background-color: #c23325;
         }
 
         .btn-success {
@@ -508,6 +508,9 @@
                 <button class="btn btn-warning btn-small" id="btn-refresh-all">
                     <i class="fas fa-sync-alt"></i> รีเฟรช
                 </button>
+                <button class="btn btn-success btn-small" id="btn-setup-db">
+                    <i class="fas fa-database"></i> ตั้งค่าฐานข้อมูล
+                </button>
             </div>
         </header>
 
@@ -527,9 +530,15 @@
             <button class="btn" id="btn-login" style="width: 100%;">
                 <i class="fas fa-sign-in-alt"></i> เข้าสู่ระบบ
             </button>
-            <p style="margin-top: 15px; color: var(--gray); font-size: 0.9rem;">
-                <i class="fas fa-info-circle"></i> สำหรับผู้ดูแลระบบเท่านั้น
-            </p>
+            <div style="margin-top: 15px; padding: 10px; background: #f0f8f0; border-radius: 5px;">
+                <p style="color: var(--gray); font-size: 0.9rem; margin-bottom: 5px;">
+                    <i class="fas fa-info-circle"></i> ข้อมูลเข้าสู่ระบบเริ่มต้น:
+                </p>
+                <p style="font-size: 0.9rem;">
+                    <strong>ผู้ใช้:</strong> admin<br>
+                    <strong>รหัสผ่าน:</strong> admin123
+                </p>
+            </div>
         </div>
 
         <!-- Admin Dashboard -->
@@ -749,6 +758,27 @@
         </div>
     </div>
 
+    <!-- Setup Database Modal -->
+    <div id="setup-modal" class="modal">
+        <div class="modal-content">
+            <h2><i class="fas fa-database"></i> ตั้งค่าฐานข้อมูล</h2>
+            <p>ดำเนินการตั้งค่าฐานข้อมูลเริ่มต้น:</p>
+            <ul style="margin: 15px 0 15px 20px;">
+                <li>สร้าง Collections หลัก (courses, bookings, seat_reservations)</li>
+                <li>เพิ่มข้อมูลวิชาตัวอย่าง</li>
+                <li>ตั้งค่าโครงสร้างข้อมูลพื้นฐาน</li>
+            </ul>
+            <div id="setup-progress" style="display: none; margin: 15px 0;">
+                <div class="loading"></div>
+                <p style="margin-top: 10px;" id="setup-status">กำลังดำเนินการ...</p>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-success" id="btn-confirm-setup">ดำเนินการ</button>
+                <button class="btn btn-secondary" id="btn-cancel-setup">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Firebase Configuration
         const firebaseConfig = {
@@ -788,6 +818,7 @@
         const btnLogin = document.getElementById('btn-login');
         const btnLogout = document.getElementById('btn-logout');
         const btnRefreshAll = document.getElementById('btn-refresh-all');
+        const btnSetupDb = document.getElementById('btn-setup-db');
         const usernameInput = document.getElementById('admin-username');
         const passwordInput = document.getElementById('admin-password');
         const loginError = document.getElementById('login-error');
@@ -826,6 +857,7 @@
         // Modals
         const confirmModal = document.getElementById('confirm-modal');
         const messageModal = document.getElementById('message-modal');
+        const setupModal = document.getElementById('setup-modal');
         const confirmTitle = document.getElementById('confirm-title');
         const confirmMessage = document.getElementById('confirm-message');
         const messageTitle = document.getElementById('message-title');
@@ -834,12 +866,20 @@
         const btnCancelDelete = document.getElementById('btn-cancel-delete');
         const btnCloseMessage = document.getElementById('btn-close-message');
         const closeConfirm = document.getElementById('close-confirm');
+        const btnConfirmSetup = document.getElementById('btn-confirm-setup');
+        const btnCancelSetup = document.getElementById('btn-cancel-setup');
+        const setupProgress = document.getElementById('setup-progress');
+        const setupStatus = document.getElementById('setup-status');
 
         // Event Listeners
         document.addEventListener('DOMContentLoaded', initializeAdminSystem);
         btnLogin.addEventListener('click', loginAdmin);
         btnLogout.addEventListener('click', logoutAdmin);
         btnRefreshAll.addEventListener('click', refreshAllData);
+        btnSetupDb.addEventListener('click', () => setupModal.classList.add('active'));
+        btnConfirmSetup.addEventListener('click', setupDatabase);
+        btnCancelSetup.addEventListener('click', () => setupModal.classList.remove('active'));
+        
         btnAddCourse.addEventListener('click', addCourse);
         btnUpdateCourse.addEventListener('click', updateCourse);
         btnDeleteCourse.addEventListener('click', deleteCourse);
@@ -894,6 +934,96 @@
                 isConnected = false;
                 updateConnectionStatus('เชื่อมต่อฐานข้อมูลล้มเหลว', 'disconnected');
                 showMessage("ข้อผิดพลาด", "ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้");
+            }
+        }
+
+        // Setup Database
+        async function setupDatabase() {
+            setupProgress.style.display = 'block';
+            setupStatus.textContent = 'กำลังตรวจสอบฐานข้อมูล...';
+            
+            try {
+                // 1. Check existing data
+                setupStatus.textContent = 'กำลังตรวจสอบข้อมูลที่มีอยู่...';
+                const coursesSnapshot = await db.collection('courses').limit(1).get();
+                
+                if (!coursesSnapshot.empty) {
+                    setupModal.classList.remove('active');
+                    showMessage("ข้อมูลมีอยู่แล้ว", "ฐานข้อมูลได้รับการตั้งค่าแล้ว ไม่ต้องดำเนินการเพิ่มเติม");
+                    return;
+                }
+                
+                // 2. Create sample courses
+                setupStatus.textContent = 'กำลังสร้างข้อมูลตัวอย่าง...';
+                const sampleCourses = [
+                    {
+                        id: 'CS101',
+                        name: 'การเขียนโปรแกรมคอมพิวเตอร์',
+                        totalSeats: 30,
+                        instructor: 'อาจารย์สมชาย ใจดี',
+                        time: 'จันทร์ 09:00-12:00',
+                        description: 'วิชาพื้นฐานการเขียนโปรแกรมด้วยภาษา Python',
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: 'MATH201',
+                        name: 'คณิตศาสตร์ดิสครีต',
+                        totalSeats: 25,
+                        instructor: 'อาจารย์สมหญิง เก่งกล้า',
+                        time: 'อังคาร 13:00-16:00',
+                        description: 'วิชาคณิตศาสตร์สำหรับนักคอมพิวเตอร์',
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: 'ENG102',
+                        name: 'ภาษาอังกฤษเพื่อการสื่อสาร',
+                        totalSeats: 40,
+                        instructor: 'อาจารย์ John Smith',
+                        time: 'พุธ 10:00-13:00',
+                        description: 'พัฒนาทักษะภาษาอังกฤษเพื่อการสื่อสาร',
+                        createdAt: new Date().toISOString()
+                    }
+                ];
+                
+                // 3. Add sample courses
+                const batch = db.batch();
+                for (const course of sampleCourses) {
+                    const courseRef = db.collection('courses').doc(course.id);
+                    batch.set(courseRef, {
+                        name: course.name,
+                        totalSeats: course.totalSeats,
+                        instructor: course.instructor,
+                        time: course.time,
+                        description: course.description,
+                        createdAt: course.createdAt
+                    });
+                }
+                
+                await batch.commit();
+                
+                // 4. Success
+                setupProgress.style.display = 'none';
+                setupModal.classList.remove('active');
+                showMessage("สำเร็จ", 
+                    "ตั้งค่าฐานข้อมูลสำเร็จ!\n\n" +
+                    "สร้างข้อมูลตัวอย่าง:\n" +
+                    "- CS101: การเขียนโปรแกรมคอมพิวเตอร์\n" +
+                    "- MATH201: คณิตศาสตร์ดิสครีต\n" +
+                    "- ENG102: ภาษาอังกฤษเพื่อการสื่อสาร\n\n" +
+                    "ระบบพร้อมใช้งานแล้ว"
+                );
+                
+                // 5. Refresh data
+                refreshAllData();
+                
+            } catch (error) {
+                console.error("Setup error:", error);
+                setupProgress.style.display = 'none';
+                showMessage("ข้อผิดพลาด", 
+                    "ไม่สามารถตั้งค่าฐานข้อมูลได้\n\n" +
+                    "สาเหตุ: " + error.message + "\n\n" +
+                    "กรุณาตรวจสอบ Firebase Security Rules"
+                );
             }
         }
 
@@ -1058,10 +1188,15 @@
                     <tr>
                         <td colspan="6" style="text-align: center; padding: 40px; color: var(--gray);">
                             <i class="fas fa-book" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
-                            ยังไม่มีข้อมูลวิชา
+                            ยังไม่มีข้อมูลวิชา<br>
+                            <button class="btn btn-success btn-small" id="btn-create-sample-courses" style="margin-top: 15px;">
+                                <i class="fas fa-plus"></i> สร้างข้อมูลตัวอย่าง
+                            </button>
                         </td>
                     </tr>
                 `;
+                
+                document.getElementById('btn-create-sample-courses')?.addEventListener('click', setupDatabase);
                 return;
             }
             
@@ -1323,7 +1458,7 @@
             if (searchTerm) {
                 filteredBookings = filteredBookings.filter(booking =>
                     booking.studentName.toLowerCase().includes(searchTerm) ||
-                    booking.studentClass.toLowerCase().includes(searchTerm) ||
+                    (booking.studentClass && booking.studentClass.toLowerCase().includes(searchTerm)) ||
                     booking.courseId.toLowerCase().includes(searchTerm)
                 );
             }
@@ -1378,7 +1513,7 @@
             if (searchText) {
                 filteredBookings = filteredBookings.filter(b => 
                     b.studentName.toLowerCase().includes(searchText) ||
-                    b.studentClass.toLowerCase().includes(searchText)
+                    (b.studentClass && b.studentClass.toLowerCase().includes(searchText))
                 );
             }
             
@@ -1458,7 +1593,7 @@
             if (searchText) {
                 exportBookings = exportBookings.filter(b => 
                     b.studentName.toLowerCase().includes(searchText) ||
-                    b.studentClass.toLowerCase().includes(searchText)
+                    (b.studentClass && b.studentClass.toLowerCase().includes(searchText))
                 );
             }
             
@@ -1475,7 +1610,7 @@
                 const formattedTime = bookingTime.toLocaleString('th-TH');
                 const courseName = allCourses[booking.courseId]?.name || '';
                 
-                csvContent += `${index + 1},"${booking.studentName}","${booking.studentClass}",${booking.seatNumber},"${booking.courseId}","${courseName}","${formattedTime}"\n`;
+                csvContent += `${index + 1},"${booking.studentName}","${booking.studentClass || ''}",${booking.seatNumber},"${booking.courseId}","${courseName}","${formattedTime}"\n`;
             });
             
             // Create and download file
