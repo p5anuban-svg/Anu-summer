@@ -18,6 +18,7 @@
             --danger: #ea4335;
             --gray: #5f6368;
             --light-gray: #f5f7fa;
+            --reserving: #ff6b35; /* สีส้มสำหรับสถานะกำลังถูกเลือก */
         }
         
         * {
@@ -192,6 +193,10 @@
             color: var(--danger);
         }
 
+        .reserving {
+            color: var(--reserving);
+        }
+
         .btn {
             display: inline-block;
             padding: 10px 20px;
@@ -323,6 +328,18 @@
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
+        }
+
+        .seat-reserving {
+            background-color: var(--reserving);
+            color: white;
+            animation: reservingPulse 2s infinite;
+        }
+
+        @keyframes reservingPulse {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { opacity: 0.8; }
         }
 
         .seat-booked {
@@ -593,6 +610,18 @@
             box-shadow: none !important;
         }
 
+        .reservation-timeout {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 10px;
+            background: #fef7e0;
+            color: var(--warning);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-top: 10px;
+        }
+
         @media (max-width: 768px) {
             .seats-grid {
                 grid-template-columns: repeat(5, 1fr);
@@ -685,9 +714,18 @@
                             <span>กำลังเลือก</span>
                         </div>
                         <div class="legend-item">
+                            <div class="legend-color seat-reserving"></div>
+                            <span>กำลังถูกเลือกโดยผู้อื่น</span>
+                        </div>
+                        <div class="legend-item">
                             <div class="legend-color seat-booked"></div>
                             <span>จองแล้ว</span>
                         </div>
+                    </div>
+                    
+                    <div class="reservation-timeout" id="reservation-timeout" style="display: none;">
+                        <i class="fas fa-clock"></i>
+                        <span>การจองที่นั่งจะหมดอายุใน <span id="timeout-countdown">30</span> วินาที</span>
                     </div>
                 </div>
                 
@@ -744,9 +782,12 @@
                         <li>เลือกวิชาจากหน้าหลัก</li>
                         <li>เลือกที่นั่งที่ว่าง (สีฟ้า)</li>
                         <li>กรอกชื่อ-นามสกุลและห้องเรียน</li>
-                        <li>คลิกยืนยันการจอง</li>
+                        <li>คลิกยืนยันการจองภายใน 30 วินาที</li>
                         <li>บันทึกข้อมูลการจองที่ได้รับ</li>
                     </ol>
+                    <p style="margin-top: 10px; color: var(--warning);">
+                        <i class="fas fa-exclamation-triangle"></i> หมายเหตุ: ที่นั่งที่เลือกจะถูกล็อคไว้ 30 วินาที
+                    </p>
                 </div>
                 
                 <div style="background: #f0f8f0; padding: 20px; border-radius: 8px;">
@@ -770,6 +811,7 @@
                     <li>สามารถจองหลายที่นั่งพร้อมกันได้</li>
                     <li>ถ้าไม่เห็นวิชาแสดงขึ้นมา ให้รอสักครู่</li>
                     <li>มีปัญหาการใช้งานให้แจ้งผู้ดูแลระบบ</li>
+                    <li>ที่นั่งสีส้มหมายถึงมีคนอื่นกำลังเลือกอยู่</li>
                 </ul>
             </div>
             
@@ -829,9 +871,13 @@
         let selectedSeats = [];
         let courses = {};
         let bookings = {};
+        let seatReservations = {}; // เก็บข้อมูลการจองชั่วคราว
         let isConnected = false;
         let lastUpdateTime = null;
-        let isProcessingBooking = false; // ป้องกันการกดยืนยันหลายครั้ง
+        let isProcessingBooking = false;
+        let reservationTimeout = null;
+        let reservationTimer = null;
+        const RESERVATION_TIMEOUT_SECONDS = 30; // เวลา 30 วินาที
 
         // DOM Elements
         const tabButtons = document.querySelectorAll('.tab-button');
@@ -855,6 +901,8 @@
         const lastUpdateElement = document.getElementById('last-update');
         const messageModal = document.getElementById('message-modal');
         const loadingModal = document.getElementById('loading-modal');
+        const reservationTimeoutElement = document.getElementById('reservation-timeout');
+        const timeoutCountdownElement = document.getElementById('timeout-countdown');
         const messageTitle = document.getElementById('message-title');
         const messageText = document.getElementById('message-text');
         const loadingText = document.getElementById('loading-text');
@@ -871,7 +919,10 @@
             });
         });
 
-        backToCoursesBtn.addEventListener('click', () => openTab('home'));
+        backToCoursesBtn.addEventListener('click', () => {
+            clearReservation();
+            openTab('home');
+        });
         confirmBookingBtn.addEventListener('click', confirmBooking);
         closeMessageBtn.addEventListener('click', closeMessage);
         btnCloseMessage.addEventListener('click', closeMessage);
@@ -1006,6 +1057,33 @@
                 updateLastUpdateTime();
             }, error => {
                 console.error('Bookings listener error:', error);
+            });
+
+            // Listen for seat reservations (ชั่วคราว)
+            db.collection('seat_reservations').onSnapshot(snapshot => {
+                if (!isConnected) return;
+                
+                seatReservations = {};
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    // ถ้าการจองชั่วคราวหมดอายุแล้ว ให้ลบออก
+                    const reservationTime = new Date(data.reservedAt);
+                    const currentTime = new Date();
+                    const timeDiff = (currentTime - reservationTime) / 1000; // หน่วยวินาที
+                    
+                    if (timeDiff < RESERVATION_TIMEOUT_SECONDS) {
+                        seatReservations[doc.id] = { id: doc.id, ...data };
+                    } else {
+                        // ลบการจองที่หมดอายุแล้ว
+                        db.collection('seat_reservations').doc(doc.id).delete();
+                    }
+                });
+                
+                if (selectedCourse) {
+                    renderSeats();
+                }
+            }, error => {
+                console.error('Seat reservations listener error:', error);
             });
         }
 
@@ -1179,6 +1257,9 @@
             studentNameInput.value = '';
             studentClassInput.value = '';
             
+            // Clear any existing reservation
+            clearReservation();
+            
             // Render seats
             renderSeats();
         }
@@ -1208,6 +1289,19 @@
                 }
             }
             
+            // Check for reserved seats (กำลังถูกเลือกโดยผู้อื่น)
+            const reservedSeats = {};
+            for (const reservationId in seatReservations) {
+                const reservation = seatReservations[reservationId];
+                if (reservation.courseId === selectedCourse && reservation.userId !== getUserId()) {
+                    // ไม่แสดงที่นั่งที่เราจองเอง
+                    reservedSeats[reservation.seatNumber] = {
+                        reserved: true,
+                        reservedAt: reservation.reservedAt
+                    };
+                }
+            }
+            
             // Update available seats count
             const availableSeats = course.totalSeats - bookedCount;
             availableSeatsCountElement.textContent = availableSeats;
@@ -1221,6 +1315,12 @@
                 if (bookedSeats[i]) {
                     seat.classList.add('seat-booked');
                     seat.title = `จองแล้วโดย: ${bookedSeats[i].studentName} (${bookedSeats[i].studentClass})`;
+                } else if (reservedSeats[i]) {
+                    seat.classList.add('seat-reserving');
+                    const reservedTime = new Date(reservedSeats[i].reservedAt);
+                    const timeDiff = Math.floor((new Date() - reservedTime) / 1000);
+                    const timeLeft = RESERVATION_TIMEOUT_SECONDS - timeDiff;
+                    seat.title = `กำลังถูกเลือกโดยผู้อื่น (เหลือเวลา ${timeLeft} วินาที)`;
                 } else if (selectedSeats.includes(i)) {
                     seat.classList.add('seat-selected');
                     seat.title = 'กำลังเลือก';
@@ -1234,33 +1334,167 @@
             }
         }
 
+        // Get unique user ID (ใช้ session ID หรือสร้างจากข้อมูลเบราว์เซอร์)
+        function getUserId() {
+            let userId = localStorage.getItem('user_id');
+            if (!userId) {
+                userId = 'user_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('user_id', userId);
+            }
+            return userId;
+        }
+
         // Select Seat
-        function selectSeat(seatNumber) {
+        async function selectSeat(seatNumber) {
             if (!isConnected) {
                 showMessage('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้');
                 return;
             }
             
-            if (!selectedSeats.includes(seatNumber)) {
-                selectedSeats.push(seatNumber);
-            } else {
-                selectedSeats = selectedSeats.filter(num => num !== seatNumber);
+            // ตรวจสอบว่ามีคนอื่นกำลังเลือกที่นั่งนี้อยู่หรือไม่
+            for (const reservationId in seatReservations) {
+                const reservation = seatReservations[reservationId];
+                if (reservation.courseId === selectedCourse && 
+                    reservation.seatNumber === seatNumber &&
+                    reservation.userId !== getUserId()) {
+                    
+                    const reservedTime = new Date(reservation.reservedAt);
+                    const timeDiff = Math.floor((new Date() - reservedTime) / 1000);
+                    const timeLeft = RESERVATION_TIMEOUT_SECONDS - timeDiff;
+                    
+                    if (timeLeft > 0) {
+                        showMessage('ไม่สามารถเลือกที่นั่งนี้ได้', 
+                            `ที่นั่ง ${seatNumber} กำลังถูกเลือกโดยผู้อื่น\n` +
+                            `กรุณารอ ${timeLeft} วินาที หรือเลือกที่นั่งอื่น`
+                        );
+                        return;
+                    }
+                }
             }
             
-            // Update display
+            // ถ้ายังไม่ได้เลือกที่นั่งนี้ ให้เพิ่ม
+            if (!selectedSeats.includes(seatNumber)) {
+                selectedSeats.push(seatNumber);
+                
+                // สร้างการจองชั่วคราว
+                await createSeatReservation(seatNumber);
+                
+                // อัพเดท UI และเริ่มนับเวลาถอยหลัง
+                updateSelectedSeatsDisplay();
+                startReservationTimer();
+                
+            } else {
+                // ถ้าต้องการยกเลิกการเลือกที่นั่งนี้
+                selectedSeats = selectedSeats.filter(num => num !== seatNumber);
+                
+                // ลบการจองชั่วคราว
+                await deleteSeatReservation(seatNumber);
+                
+                // อัพเดท UI
+                updateSelectedSeatsDisplay();
+                
+                // ถ้าไม่ได้เลือกที่นั่งใดเลย ให้ล้าง timer
+                if (selectedSeats.length === 0) {
+                    clearReservation();
+                }
+            }
+            
+            renderSeats();
+        }
+
+        // สร้างการจองชั่วคราว
+        async function createSeatReservation(seatNumber) {
+            try {
+                const reservationId = `${selectedCourse}_${seatNumber}_${getUserId()}`;
+                const reservationRef = db.collection('seat_reservations').doc(reservationId);
+                
+                await reservationRef.set({
+                    courseId: selectedCourse,
+                    seatNumber: seatNumber,
+                    userId: getUserId(),
+                    reservedAt: new Date().toISOString(),
+                    expiresAt: new Date(Date.now() + RESERVATION_TIMEOUT_SECONDS * 1000).toISOString()
+                });
+                
+            } catch (error) {
+                console.error('Error creating seat reservation:', error);
+            }
+        }
+
+        // ลบการจองชั่วคราว
+        async function deleteSeatReservation(seatNumber) {
+            try {
+                const reservationId = `${selectedCourse}_${seatNumber}_${getUserId()}`;
+                await db.collection('seat_reservations').doc(reservationId).delete();
+            } catch (error) {
+                console.error('Error deleting seat reservation:', error);
+            }
+        }
+
+        // อัพเดทการแสดงผลที่นั่งที่เลือก
+        function updateSelectedSeatsDisplay() {
             if (selectedSeats.length > 0) {
                 selectedSeatsDisplay.textContent = selectedSeats.join(', ');
                 selectedSeatsDisplay.style.background = '#e8f0fe';
                 selectedSeatsDisplay.style.color = '#1a73e8';
                 selectedSeatsDisplay.style.fontWeight = 'bold';
+                
+                // แสดงเวลาเหลือ
+                reservationTimeoutElement.style.display = 'flex';
             } else {
                 selectedSeatsDisplay.textContent = 'ยังไม่มีการเลือกที่นั่ง';
                 selectedSeatsDisplay.style.background = '#e8f0fe';
                 selectedSeatsDisplay.style.color = '#1a73e8';
                 selectedSeatsDisplay.style.fontWeight = 'normal';
+                
+                // ซ่อนเวลาเหลือ
+                reservationTimeoutElement.style.display = 'none';
+            }
+        }
+
+        // เริ่มนับเวลาถอยหลัง
+        function startReservationTimer() {
+            clearTimeout(reservationTimeout);
+            clearInterval(reservationTimer);
+            
+            let timeLeft = RESERVATION_TIMEOUT_SECONDS;
+            timeoutCountdownElement.textContent = timeLeft;
+            
+            reservationTimer = setInterval(() => {
+                timeLeft--;
+                timeoutCountdownElement.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearReservation();
+                    showMessage('หมดเวลาการจอง', 'เวลาจองที่นั่งหมดอายุแล้ว กรุณาเลือกที่นั่งใหม่');
+                }
+            }, 1000);
+            
+            reservationTimeout = setTimeout(() => {
+                clearReservation();
+            }, RESERVATION_TIMEOUT_SECONDS * 1000);
+        }
+
+        // ล้างการจองทั้งหมด
+        async function clearReservation() {
+            // ลบการจองชั่วคราวทั้งหมดของผู้ใช้
+            if (selectedCourse) {
+                for (const seatNumber of selectedSeats) {
+                    await deleteSeatReservation(seatNumber);
+                }
             }
             
-            renderSeats();
+            selectedSeats = [];
+            updateSelectedSeatsDisplay();
+            
+            clearTimeout(reservationTimeout);
+            clearInterval(reservationTimer);
+            
+            reservationTimeoutElement.style.display = 'none';
+            
+            if (selectedCourse) {
+                renderSeats();
+            }
         }
 
         // ฟังก์ชันป้องกันการจองซ้ำ - ใช้ Transaction
@@ -1277,6 +1511,11 @@
                     throw new Error(`ที่นั่ง ${seatNumber} ถูกจองไปแล้ว`);
                 }
                 
+                // ลบการจองชั่วคราว
+                const reservationId = `${courseId}_${seatNumber}_${getUserId()}`;
+                const reservationRef = db.collection('seat_reservations').doc(reservationId);
+                transaction.delete(reservationRef);
+                
                 // สร้างการจองใหม่
                 const bookingRef = db.collection('bookings').doc();
                 transaction.set(bookingRef, {
@@ -1292,7 +1531,7 @@
             });
         }
 
-        // Confirm Booking - แก้ไขเพื่อป้องกันการจองซ้ำ
+        // Confirm Booking
         async function confirmBooking() {
             if (isProcessingBooking) {
                 showMessage('กำลังดำเนินการ', 'กรุณารอสักครู่ กำลังดำเนินการจอง...');
@@ -1387,10 +1626,7 @@
                     );
                     
                     // Reset form
-                    selectedSeats = [];
-                    selectedSeatsDisplay.textContent = 'ยังไม่มีการเลือกที่นั่ง';
-                    selectedSeatsDisplay.style.background = '#e8f0fe';
-                    selectedSeatsDisplay.style.color = '#1a73e8';
+                    clearReservation();
                     studentNameInput.value = '';
                     studentClassInput.value = '';
                     
@@ -1414,11 +1650,7 @@
                     
                     // อัพเดทที่นั่งที่เลือกใหม่ (เฉพาะที่นั่งที่จองไม่ได้)
                     selectedSeats = failedSeats.map(f => f.seatNumber);
-                    if (selectedSeats.length > 0) {
-                        selectedSeatsDisplay.textContent = selectedSeats.join(', ');
-                    } else {
-                        selectedSeatsDisplay.textContent = 'ยังไม่มีการเลือกที่นั่ง';
-                    }
+                    updateSelectedSeatsDisplay();
                     
                     renderSeats();
                     
