@@ -425,6 +425,31 @@
             100% { transform: rotate(360deg); }
         }
 
+        .connection-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-bottom: 15px;
+        }
+
+        .connection-status.connected {
+            background: #e6f4ea;
+            color: var(--success);
+        }
+
+        .connection-status.disconnected {
+            background: #fdecea;
+            color: var(--danger);
+        }
+
+        .connection-status.connecting {
+            background: #fef7e0;
+            color: var(--warning);
+        }
+
         @media (max-width: 768px) {
             .admin-controls {
                 grid-template-columns: 1fr;
@@ -505,6 +530,10 @@
                 <div>
                     <h2><i class="fas fa-tachometer-alt"></i> แผงควบคุมผู้ดูแลระบบ</h2>
                     <p style="color: var(--gray); margin-top: 5px;">ข้อมูลอัพเดตล่าสุด: <span id="last-update">-</span></p>
+                    <div class="connection-status connecting" id="connection-status">
+                        <i class="fas fa-circle"></i>
+                        <span>กำลังเชื่อมต่อกับฐานข้อมูล...</span>
+                    </div>
                 </div>
                 <div style="display: flex; gap: 10px; align-items: center;">
                     <span style="color: var(--gray);">สวัสดี, <strong id="admin-name"></strong></span>
@@ -734,6 +763,7 @@
         const adminDashboard = document.getElementById('admin-dashboard');
         const adminNameElement = document.getElementById('admin-name');
         const lastUpdateElement = document.getElementById('last-update');
+        const connectionStatus = document.getElementById('connection-status');
         const btnLogin = document.getElementById('btn-login');
         const btnLogout = document.getElementById('btn-logout');
         const btnRefreshAll = document.getElementById('btn-refresh-all');
@@ -814,18 +844,32 @@
             if (savedAdmin) {
                 currentAdmin = JSON.parse(savedAdmin);
                 showAdminDashboard();
-                initializeData();
+                await initializeData();
             }
             
             updateLastUpdateTime();
         }
 
+        // Update Connection Status
+        function updateConnectionStatus(text, status) {
+            connectionStatus.innerHTML = `
+                <i class="fas fa-circle"></i>
+                <span>${text}</span>
+            `;
+            connectionStatus.className = `connection-status ${status}`;
+        }
+
         // Initialize Data
         async function initializeData() {
             try {
+                updateConnectionStatus('กำลังเชื่อมต่อกับฐานข้อมูล...', 'connecting');
+                
                 // Test connection
-                await db.collection('test').add({ test: Date.now() });
+                const testRef = db.collection('test_connection');
+                await testRef.add({ test: Date.now() });
+                
                 isConnected = true;
+                updateConnectionStatus('เชื่อมต่อกับฐานข้อมูลสำเร็จ', 'connected');
                 
                 // Setup real-time listeners
                 setupRealtimeListeners();
@@ -837,15 +881,18 @@
             } catch (error) {
                 console.error("Connection error:", error);
                 isConnected = false;
+                updateConnectionStatus('เชื่อมต่อกับฐานข้อมูลล้มเหลว', 'disconnected');
                 showMessage("ข้อผิดพลาด", "ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้");
             }
         }
 
         // Setup Real-time Listeners
         function setupRealtimeListeners() {
+            console.log("Setting up real-time listeners...");
+            
             // Courses listener
             db.collection("courses").onSnapshot(snapshot => {
-                if (!isConnected) return;
+                console.log("Courses snapshot received:", snapshot.size, "documents");
                 
                 allCourses = {};
                 snapshot.forEach(doc => {
@@ -859,11 +906,12 @@
                 
             }, error => {
                 console.error("Courses listener error:", error);
+                updateConnectionStatus('การเชื่อมต่อมีปัญหา', 'disconnected');
             });
 
             // Bookings listener
             db.collection("bookings").onSnapshot(snapshot => {
-                if (!isConnected) return;
+                console.log("Bookings snapshot received:", snapshot.size, "documents");
                 
                 allBookings = {};
                 snapshot.forEach(doc => {
@@ -877,6 +925,7 @@
                 
             }, error => {
                 console.error("Bookings listener error:", error);
+                updateConnectionStatus('การเชื่อมต่อมีปัญหา', 'disconnected');
             });
         }
 
