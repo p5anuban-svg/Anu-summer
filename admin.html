@@ -16,6 +16,7 @@
             --success: #34a853;
             --warning: #fbbc04;
             --danger: #ea4335;
+            --reserving: #ff6b35;
             --gray: #5f6368;
             --light-gray: #f5f7fa;
         }
@@ -324,6 +325,11 @@
             color: var(--primary);
         }
 
+        .badge-reserving {
+            background: #fff3e0;
+            color: var(--reserving);
+        }
+
         .login-form {
             max-width: 400px;
             margin: 50px auto;
@@ -446,6 +452,31 @@
         }
 
         .connection-status.connecting {
+            background: #fef7e0;
+            color: var(--warning);
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            margin-left: 5px;
+        }
+
+        .status-active {
+            background: #e6f4ea;
+            color: var(--success);
+        }
+
+        .status-inactive {
+            background: #fdecea;
+            color: var(--danger);
+        }
+
+        .status-pending {
             background: #fef7e0;
             color: var(--warning);
         }
@@ -635,6 +666,9 @@
                         <button class="btn btn-danger" id="btn-clear-bookings">
                             <i class="fas fa-broom"></i> ล้างข้อมูลทั้งหมด
                         </button>
+                        <button class="btn btn-warning" id="btn-clear-reservations">
+                            <i class="fas fa-hourglass-end"></i> ล้างการจองชั่วคราว
+                        </button>
                     </div>
                     <p style="margin-top: 15px; color: var(--danger); font-size: 0.85rem;">
                         <i class="fas fa-exclamation-triangle"></i> การลบข้อมูลไม่สามารถกู้คืนได้
@@ -658,6 +692,27 @@
                     </thead>
                     <tbody id="courses-table-body">
                         <!-- Courses will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Active Reservations Table -->
+            <h3 style="margin-top: 30px;"><i class="fas fa-clock"></i> การจองชั่วคราวที่กำลังดำเนินอยู่</h3>
+            <div class="data-table-container">
+                <table class="data-table" id="reservations-table">
+                    <thead>
+                        <tr>
+                            <th width="100">รหัสวิชา</th>
+                            <th width="100">เลขที่นั่ง</th>
+                            <th width="150">User ID</th>
+                            <th width="150">เวลาจอง</th>
+                            <th width="150">หมดอายุ</th>
+                            <th width="100">สถานะ</th>
+                            <th width="100">จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reservations-table-body">
+                        <!-- Reservations will be loaded here -->
                     </tbody>
                 </table>
             </div>
@@ -750,12 +805,14 @@
         let currentAdmin = null;
         let allCourses = {};
         let allBookings = {};
+        let allReservations = {};
         let selectedBookingId = null;
         let isConnected = false;
         let lastStats = {
             totalCourses: 0,
             totalBookings: 0,
-            todayBookings: 0
+            todayBookings: 0,
+            activeReservations: 0
         };
 
         // DOM Elements
@@ -794,9 +851,13 @@
         const btnSearch = document.getElementById('btn-search');
         const btnExportExcel = document.getElementById('btn-export-excel');
         const btnClearBookings = document.getElementById('btn-clear-bookings');
+        const btnClearReservations = document.getElementById('btn-clear-reservations');
         const btnDeleteBooking = document.getElementById('btn-delete-booking');
         const btnRefreshBookings = document.getElementById('btn-refresh-bookings');
         const bookingsTableBody = document.getElementById('bookings-table-body');
+        
+        // Reservations Management
+        const reservationsTableBody = document.getElementById('reservations-table-body');
         
         // Stats
         const statsContainer = document.getElementById('stats-container');
@@ -824,6 +885,7 @@
         btnSearch.addEventListener('click', searchBookings);
         btnExportExcel.addEventListener('click', exportToExcel);
         btnClearBookings.addEventListener('click', clearBookings);
+        btnClearReservations.addEventListener('click', clearReservations);
         btnDeleteBooking.addEventListener('click', showDeleteBookingModal);
         btnRefreshBookings.addEventListener('click', refreshBookings);
         btnConfirmDelete.addEventListener('click', confirmDeleteAction);
@@ -877,6 +939,7 @@
                 // Initial load
                 await loadCourses();
                 await loadBookings();
+                await loadReservations();
                 
             } catch (error) {
                 console.error("Connection error:", error);
@@ -894,16 +957,11 @@
             db.collection("courses").onSnapshot(snapshot => {
                 console.log("Courses snapshot received:", snapshot.size, "documents");
                 
-                // Clear and update allCourses
-                const updatedCourses = {};
+                allCourses = {};
                 snapshot.forEach(doc => {
-                    updatedCourses[doc.id] = { id: doc.id, ...doc.data() };
+                    allCourses[doc.id] = { id: doc.id, ...doc.data() };
                 });
                 
-                // Update global variable
-                allCourses = updatedCourses;
-                
-                // Update UI
                 updateCoursesTable();
                 updateCourseFilter();
                 updateStats();
@@ -918,16 +976,11 @@
             db.collection("bookings").onSnapshot(snapshot => {
                 console.log("Bookings snapshot received:", snapshot.size, "documents");
                 
-                // Clear and update allBookings
-                const updatedBookings = {};
+                allBookings = {};
                 snapshot.forEach(doc => {
-                    updatedBookings[doc.id] = { id: doc.id, ...doc.data() };
+                    allBookings[doc.id] = { id: doc.id, ...doc.data() };
                 });
                 
-                // Update global variable
-                allBookings = updatedBookings;
-                
-                // Update UI
                 updateBookingsTable();
                 updateBookingDeleteSelect();
                 updateStats();
@@ -936,6 +989,22 @@
             }, error => {
                 console.error("Bookings listener error:", error);
                 updateConnectionStatus('การเชื่อมต่อมีปัญหา', 'disconnected');
+            });
+
+            // Seat Reservations listener
+            db.collection("seat_reservations").onSnapshot(snapshot => {
+                console.log("Seat reservations snapshot received:", snapshot.size, "documents");
+                
+                allReservations = {};
+                snapshot.forEach(doc => {
+                    allReservations[doc.id] = { id: doc.id, ...doc.data() };
+                });
+                
+                updateReservationsTable();
+                updateStats();
+                
+            }, error => {
+                console.error("Seat reservations listener error:", error);
             });
         }
 
@@ -1028,8 +1097,6 @@
 
         function updateCoursesTable() {
             console.log("Updating courses table...");
-            console.log("All courses:", allCourses);
-            console.log("All bookings:", allBookings);
             
             coursesTableBody.innerHTML = '';
             
@@ -1056,7 +1123,17 @@
                     }
                 }
                 
-                const percentage = course.totalSeats > 0 ? Math.round((bookingCount / course.totalSeats) * 100) : 0;
+                // Count active reservations for this course
+                let reservationCount = 0;
+                for (const reservationId in allReservations) {
+                    if (allReservations[reservationId].courseId === courseId) {
+                        reservationCount++;
+                    }
+                }
+                
+                const totalOccupied = bookingCount + reservationCount;
+                const percentage = course.totalSeats > 0 ? Math.round((totalOccupied / course.totalSeats) * 100) : 0;
+                
                 let statusClass = 'badge-success';
                 if (percentage >= 80) statusClass = 'badge-danger';
                 else if (percentage >= 50) statusClass = 'badge-warning';
@@ -1071,6 +1148,9 @@
                     <td>
                         <div>${bookingCount}/${course.totalSeats}</div>
                         <span class="badge ${statusClass}">${percentage}%</span>
+                        ${reservationCount > 0 ? 
+                            `<div><small class="badge badge-reserving">กำลังจอง: ${reservationCount}</small></div>` : ''
+                        }
                     </td>
                     <td>${course.instructor || '-'}</td>
                     <td>${course.time || '-'}</td>
@@ -1194,8 +1274,18 @@
                             .where("courseId", "==", code)
                             .get();
                         
+                        // Delete all reservations for this course
+                        const reservationsSnapshot = await db.collection("seat_reservations")
+                            .where("courseId", "==", code)
+                            .get();
+                        
                         const batch = db.batch();
+                        
                         bookingsSnapshot.forEach(doc => {
+                            batch.delete(doc.ref);
+                        });
+                        
+                        reservationsSnapshot.forEach(doc => {
                             batch.delete(doc.ref);
                         });
                         
@@ -1231,6 +1321,23 @@
             } catch (error) {
                 console.error("Error loading bookings:", error);
                 showMessage("ข้อผิดพลาด", "ไม่สามารถโหลดข้อมูลการจองได้");
+            }
+        }
+
+        // Load Reservations
+        async function loadReservations() {
+            try {
+                console.log("Loading seat reservations...");
+                const snapshot = await db.collection("seat_reservations").get();
+                allReservations = {};
+                snapshot.forEach(doc => {
+                    allReservations[doc.id] = { id: doc.id, ...doc.data() };
+                });
+                console.log("Seat reservations loaded:", Object.keys(allReservations).length);
+                updateReservationsTable();
+                
+            } catch (error) {
+                console.error("Error loading seat reservations:", error);
             }
         }
 
@@ -1293,6 +1400,91 @@
             });
             
             console.log("Bookings table updated with", displayBookings.length, "bookings");
+        }
+
+        function updateReservationsTable() {
+            reservationsTableBody.innerHTML = '';
+            
+            const activeReservations = Object.values(allReservations).filter(reservation => {
+                const expiresAt = new Date(reservation.expiresAt);
+                return expiresAt > new Date();
+            });
+            
+            if (activeReservations.length === 0) {
+                reservationsTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: var(--gray);">
+                            <i class="fas fa-hourglass-end" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                            ไม่พบข้อมูลการจองชั่วคราวที่กำลังดำเนินอยู่
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            activeReservations.forEach(reservation => {
+                const reservedAt = new Date(reservation.reservedAt);
+                const expiresAt = new Date(reservation.expiresAt);
+                const now = new Date();
+                
+                const formattedReservedAt = reservedAt.toLocaleTimeString('th-TH', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+                
+                const timeLeft = Math.max(0, Math.floor((expiresAt - now) / 1000));
+                const isExpired = timeLeft <= 0;
+                
+                let statusText = 'กำลังดำเนินการ';
+                let statusClass = 'status-active';
+                
+                if (timeLeft < 10) {
+                    statusText = `ใกล้หมดเวลา (${timeLeft}s)`;
+                    statusClass = 'status-pending';
+                } else if (isExpired) {
+                    statusText = 'หมดเวลาแล้ว';
+                    statusClass = 'status-inactive';
+                }
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${reservation.courseId}</strong></td>
+                    <td>
+                        <span class="badge badge-info">${reservation.seatNumber}</span>
+                    </td>
+                    <td>
+                        <div>${reservation.userId.substring(0, 8)}...</div>
+                        <small style="color: var(--gray);">${reservation.userId}</small>
+                    </td>
+                    <td>${formattedReservedAt}</td>
+                    <td>${expiresAt.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}</td>
+                    <td>
+                        <span class="status-indicator ${statusClass}">
+                            <i class="fas fa-circle"></i> ${statusText}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-danger btn-small" onclick="deleteReservation('${reservation.id}')">
+                            <i class="fas fa-times"></i> ยกเลิก
+                        </button>
+                    </td>
+                `;
+                reservationsTableBody.appendChild(row);
+            });
+            
+            console.log("Reservations table updated with", activeReservations.length, "active reservations");
+        }
+
+        // Delete Reservation
+        async function deleteReservation(reservationId) {
+            try {
+                await db.collection("seat_reservations").doc(reservationId).delete();
+                showMessage("สำเร็จ", "ยกเลิกการจองชั่วคราวสำเร็จแล้ว");
+            } catch (error) {
+                console.error("Error deleting reservation:", error);
+                showMessage("ข้อผิดพลาด", "ไม่สามารถยกเลิกการจองชั่วคราวได้");
+            }
         }
 
         function filterBookings() {
@@ -1409,6 +1601,32 @@
             );
         }
 
+        async function clearReservations() {
+            showConfirmModal(
+                "ยืนยันการล้างการจองชั่วคราว",
+                "คุณแน่ใจหรือไม่ว่าต้องการล้างข้อมูลการจองชั่วคราวทั้งหมด?<br><br>" +
+                "การจองชั่วคราวทั้งหมดจะถูกลบออกจากระบบ",
+                async () => {
+                    try {
+                        const snapshot = await db.collection("seat_reservations").get();
+                        
+                        const batch = db.batch();
+                        snapshot.forEach(doc => {
+                            batch.delete(doc.ref);
+                        });
+                        
+                        await batch.commit();
+                        
+                        showMessage("สำเร็จ", "ล้างข้อมูลการจองชั่วคราวทั้งหมดสำเร็จแล้ว");
+                        
+                    } catch (error) {
+                        console.error("Error clearing reservations:", error);
+                        showMessage("ข้อผิดพลาด", "ไม่สามารถล้างข้อมูลการจองชั่วคราวได้");
+                    }
+                }
+            );
+        }
+
         function showDeleteBookingModal() {
             const bookingId = selectBookingDelete.value;
             
@@ -1486,6 +1704,17 @@
             const totalCourses = Object.keys(allCourses).length;
             const totalBookings = Object.keys(allBookings).length;
             
+            // Count active reservations
+            let activeReservations = 0;
+            const now = new Date();
+            
+            Object.values(allReservations).forEach(reservation => {
+                const expiresAt = new Date(reservation.expiresAt);
+                if (expiresAt > now) {
+                    activeReservations++;
+                }
+            });
+            
             let todayBookings = 0;
             const today = new Date().toISOString().split('T')[0];
             
@@ -1499,9 +1728,10 @@
             const courseChange = totalCourses - lastStats.totalCourses;
             const bookingChange = totalBookings - lastStats.totalBookings;
             const todayChange = todayBookings - lastStats.todayBookings;
+            const reservationChange = activeReservations - lastStats.activeReservations;
             
             // Update last stats
-            lastStats = { totalCourses, totalBookings, todayBookings };
+            lastStats = { totalCourses, totalBookings, todayBookings, activeReservations };
             
             statsContainer.innerHTML = `
                 <div class="stat-card">
@@ -1532,12 +1762,17 @@
                     ` : ''}
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">${totalCourses > 0 ? Math.round((totalBookings / (totalCourses * 30)) * 100) : 0}%</div>
-                    <div class="stat-label">อัตราการจอง</div>
+                    <div class="stat-value">${activeReservations}</div>
+                    <div class="stat-label">กำลังจองชั่วคราว</div>
+                    ${reservationChange !== 0 ? `
+                        <div class="stat-change ${reservationChange > 0 ? 'positive' : 'negative'}">
+                            ${reservationChange > 0 ? '+' : ''}${reservationChange}
+                        </div>
+                    ` : ''}
                 </div>
             `;
             
-            console.log("Stats updated:", { totalCourses, totalBookings, todayBookings });
+            console.log("Stats updated:", { totalCourses, totalBookings, todayBookings, activeReservations });
         }
 
         function updateCourseFilter() {
@@ -1556,6 +1791,7 @@
             showMessage("กำลังอัพเดต", "กำลังโหลดข้อมูลใหม่...");
             loadCourses();
             loadBookings();
+            loadReservations();
         }
 
         function refreshBookings() {
@@ -1632,8 +1868,18 @@
                             .where("courseId", "==", courseCode)
                             .get();
                         
+                        // Delete all reservations for this course
+                        const reservationsSnapshot = await db.collection("seat_reservations")
+                            .where("courseId", "==", courseCode)
+                            .get();
+                        
                         const batch = db.batch();
+                        
                         bookingsSnapshot.forEach(doc => {
+                            batch.delete(doc.ref);
+                        });
+                        
+                        reservationsSnapshot.forEach(doc => {
                             batch.delete(doc.ref);
                         });
                         
@@ -1679,6 +1925,22 @@
                         console.error("Error deleting booking:", error);
                         showMessage("ข้อผิดพลาด", "ไม่สามารถลบข้อมูลการจองได้");
                         selectedBookingId = null;
+                    }
+                }
+            );
+        };
+
+        window.deleteReservation = function(reservationId) {
+            showConfirmModal(
+                "ยืนยันการยกเลิกการจองชั่วคราว",
+                "คุณแน่ใจหรือไม่ว่าต้องการยกเลิกการจองชั่วคราวนี้?",
+                async () => {
+                    try {
+                        await db.collection("seat_reservations").doc(reservationId).delete();
+                        showMessage("สำเร็จ", "ยกเลิกการจองชั่วคราวสำเร็จแล้ว");
+                    } catch (error) {
+                        console.error("Error deleting reservation:", error);
+                        showMessage("ข้อผิดพลาด", "ไม่สามารถยกเลิกการจองชั่วคราวได้");
                     }
                 }
             );
