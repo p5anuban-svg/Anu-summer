@@ -13,11 +13,11 @@
         :root {
             --primary: #1a73e8;
             --primary-dark: #0d47a1;
-            --success: #34a853;       /* สีเขียวสำหรับสถานะกำลังเลือก */
-            --success-light: #81c995; /* สีเขียวอ่อนสำหรับแอนิเมชัน */
+            --success: #34a853;
+            --success-light: #81c995;
             --warning: #fbbc04;
-            --danger: #ea4335;
-            --reserving: #ff6b35;     /* สีส้มสำหรับสถานะกำลังถูกเลือกโดยผู้อื่น */
+            --booked: #000000;         /* สีดำสำหรับสถานะจองแล้ว */
+            --reserving: #ff6b35;
             --gray: #5f6368;
             --light-gray: #f5f7fa;
         }
@@ -71,6 +71,7 @@
             font-size: 0.9rem;
             transition: all 0.3s;
             border: 1px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
         }
 
         .admin-link:hover {
@@ -191,7 +192,7 @@
         }
 
         .booked {
-            color: var(--danger);
+            color: var(--booked); /* เปลี่ยนเป็นสีดำ */
         }
 
         .reserving {
@@ -237,11 +238,12 @@
         }
 
         .btn-danger {
-            background-color: var(--danger);
+            background-color: var(--booked); /* เปลี่ยนปุ่มลบเป็นสีดำ */
+            color: white;
         }
 
         .btn-danger:hover {
-            background-color: #d33426;
+            background-color: #333333;
         }
 
         .booking-container {
@@ -363,10 +365,10 @@
         }
 
         .seat-booked {
-            background-color: var(--danger);
+            background-color: var(--booked); /* เปลี่ยนเป็นสีดำ */
             color: white;
             cursor: not-allowed;
-            opacity: 0.8;
+            opacity: 0.9;
         }
 
         .seat-legend {
@@ -531,7 +533,7 @@
 
         .connection-status.disconnected {
             background: #fdecea;
-            color: var(--danger);
+            color: var(--booked);
         }
 
         .connection-status.connecting {
@@ -591,7 +593,7 @@
         }
 
         .close-modal:hover {
-            color: var(--danger);
+            color: var(--booked);
         }
 
         .loading {
@@ -699,7 +701,7 @@
         <header>
             <h1><i class="fas fa-chair"></i> ระบบจองที่นั่งเรียน</h1>
             <p>มหาวิทยาลัยเทคโนโลยีแห่งการเรียนรู้</p>
-            <a href="admin.html" class="admin-link">
+            <a href="#" class="admin-link" id="admin-access-link">
                 <i class="fas fa-user-shield"></i> ผู้ดูแลระบบ
             </a>
         </header>
@@ -752,7 +754,7 @@
                         </div>
                         <div class="legend-item">
                             <div class="legend-color seat-booked"></div>
-                            <span>จองแล้ว</span>
+                            <span>จองแล้ว (สีดำ)</span>
                         </div>
                     </div>
                     
@@ -828,14 +830,31 @@
                     <p style="margin-top: 10px; color: var(--success);">
                         <i class="fas fa-lightbulb"></i> ที่นั่งสีเขียว = กำลังเลือกอยู่
                     </p>
+                    <p style="margin-top: 5px; color: var(--booked);">
+                        <i class="fas fa-lightbulb"></i> ที่นั่งสีดำ = จองแล้ว
+                    </p>
                 </div>
                 
                 <div style="background: #f0f8f0; padding: 20px; border-radius: 8px;">
                     <h3 style="color: var(--success); margin-bottom: 15px;">
                         <i class="fas fa-chalkboard-teacher"></i> สำหรับอาจารย์
                     </h3>
-                    <p>คลิกปุ่ม <a href="admin.html" style="color: var(--primary); text-decoration: underline;">ผู้ดูแลระบบ</a> ที่มุมขวาบน</p>
-                    <p>หรือเปิดลิงก์นี้: <a href="admin.html" style="color: var(--primary);">admin.html</a></p>
+                    <p>คลิกปุ่ม <span style="color: var(--primary); text-decoration: underline; cursor: pointer;" id="help-admin-link">ผู้ดูแลระบบ</span> ที่มุมขวาบน</p>
+                    <p>กรุณาเข้าสู่ระบบเพื่อใช้งานส่วนผู้ดูแล</p>
+                    <div class="admin-login-form" style="margin-top: 15px; padding: 15px; background: #e8f4ea; border-radius: 5px;">
+                        <h4 style="color: var(--success); margin-bottom: 10px;">เข้าสู่ระบบผู้ดูแล</h4>
+                        <div class="form-group" style="margin-bottom: 10px;">
+                            <label for="help-admin-username">ชื่อผู้ใช้</label>
+                            <input type="text" id="help-admin-username" placeholder="admin" style="padding: 8px; width: 100%;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 10px;">
+                            <label for="help-admin-password">รหัสผ่าน</label>
+                            <input type="password" id="help-admin-password" placeholder="admin123" style="padding: 8px; width: 100%;">
+                        </div>
+                        <button class="btn btn-success" id="help-admin-login" style="width: 100%; padding: 8px;">
+                            <i class="fas fa-sign-in-alt"></i> เข้าสู่ระบบ
+                        </button>
+                    </div>
                     <p style="margin-top: 10px; color: var(--gray); font-size: 0.9rem;">
                         <i class="fas fa-key"></i> รหัสผ่านเริ่มต้น: admin123
                     </p>
@@ -853,13 +872,14 @@
                     <li>มีปัญหาการใช้งานให้แจ้งผู้ดูแลระบบ</li>
                     <li>ที่นั่งสีส้มหมายถึงมีคนอื่นกำลังเลือกอยู่</li>
                     <li>ที่นั่งสีเขียวหมายถึงคุณกำลังเลือกอยู่</li>
+                    <li>ที่นั่งสีดำหมายถึงจองแล้วโดยผู้อื่น</li>
                 </ul>
             </div>
             
             <div style="text-align: center; margin-top: 30px;">
-                <a href="admin.html" class="btn" style="padding: 15px 30px;">
+                <button class="btn" id="go-to-admin-btn" style="padding: 15px 30px;">
                     <i class="fas fa-user-shield"></i> ไปที่หน้าผู้ดูแลระบบ
-                </a>
+                </button>
             </div>
         </div>
 
@@ -868,7 +888,7 @@
             <div class="footer-links">
                 <a href="./"><i class="fas fa-home"></i> หน้าหลัก</a>
                 <a href="#help"><i class="fas fa-question-circle"></i> วิธีใช้</a>
-                <a href="admin.html"><i class="fas fa-user-shield"></i> ผู้ดูแล</a>
+                <a href="#" id="footer-admin-link"><i class="fas fa-user-shield"></i> ผู้ดูแล</a>
             </div>
         </footer>
     </div>
@@ -889,6 +909,32 @@
             <div class="loading" style="width: 40px; height: 40px; margin: 20px auto;"></div>
             <h3>กำลังดำเนินการ...</h3>
             <p id="loading-text">กำลังตรวจสอบที่นั่งและบันทึกข้อมูล</p>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="admin-login-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="close-admin-login">&times;</span>
+            <h2><i class="fas fa-user-shield"></i> เข้าสู่ระบบผู้ดูแล</h2>
+            <div id="admin-login-error" class="error-message" style="display: none;"></div>
+            <div id="admin-login-success" class="success-message" style="display: none;"></div>
+            <div class="form-group">
+                <label for="modal-admin-username">ชื่อผู้ใช้</label>
+                <input type="text" id="modal-admin-username" placeholder="admin" value="admin">
+            </div>
+            <div class="form-group">
+                <label for="modal-admin-password">รหัสผ่าน</label>
+                <input type="password" id="modal-admin-password" placeholder="admin123" value="admin123">
+            </div>
+            <button class="btn btn-success" id="modal-admin-login" style="width: 100%; margin-top: 20px;">
+                <i class="fas fa-sign-in-alt"></i> เข้าสู่ระบบ
+            </button>
+            <div style="text-align: center; margin-top: 15px;">
+                <small style="color: var(--gray);">
+                    <i class="fas fa-info-circle"></i> สำหรับผู้ดูแลระบบเท่านั้น
+                </small>
+            </div>
         </div>
     </div>
 
@@ -942,12 +988,22 @@
         const lastUpdateElement = document.getElementById('last-update');
         const messageModal = document.getElementById('message-modal');
         const loadingModal = document.getElementById('loading-modal');
+        const adminLoginModal = document.getElementById('admin-login-modal');
         const reservationTimeoutElement = document.getElementById('reservation-timeout');
         const timeoutCountdownElement = document.getElementById('timeout-countdown');
         const confirmationBox = document.getElementById('confirmation-box');
+        const adminAccessLink = document.getElementById('admin-access-link');
+        const footerAdminLink = document.getElementById('footer-admin-link');
+        const goToAdminBtn = document.getElementById('go-to-admin-btn');
+        const helpAdminLink = document.getElementById('help-admin-link');
+        const helpAdminLogin = document.getElementById('help-admin-login');
+        const modalAdminLogin = document.getElementById('modal-admin-login');
+        const closeAdminLogin = document.getElementById('close-admin-login');
         const messageTitle = document.getElementById('message-title');
         const messageText = document.getElementById('message-text');
         const loadingText = document.getElementById('loading-text');
+        const adminLoginError = document.getElementById('admin-login-error');
+        const adminLoginSuccess = document.getElementById('admin-login-success');
         const closeMessageBtn = document.getElementById('close-message');
         const btnCloseMessage = document.getElementById('btn-close-message');
 
@@ -965,9 +1021,24 @@
             clearReservation();
             openTab('home');
         });
+        
         confirmBookingBtn.addEventListener('click', confirmBooking);
         closeMessageBtn.addEventListener('click', closeMessage);
         btnCloseMessage.addEventListener('click', closeMessage);
+        closeAdminLogin.addEventListener('click', () => adminLoginModal.classList.remove('active'));
+        
+        // Admin access listeners
+        adminAccessLink.addEventListener('click', showAdminLogin);
+        footerAdminLink.addEventListener('click', showAdminLogin);
+        goToAdminBtn.addEventListener('click', showAdminLogin);
+        helpAdminLink.addEventListener('click', showAdminLogin);
+        helpAdminLogin.addEventListener('click', loginFromHelpPage);
+        modalAdminLogin.addEventListener('click', loginFromModal);
+
+        // Prevent default behavior for admin links
+        document.querySelectorAll('a[href="#"]').forEach(link => {
+            link.addEventListener('click', (e) => e.preventDefault());
+        });
 
         // Initialize App
         async function initializeApp() {
@@ -1008,6 +1079,77 @@
                     '3. โปรเจค Firebase Configuration'
                 );
             }
+        }
+
+        // Show Admin Login Modal
+        function showAdminLogin() {
+            adminLoginModal.classList.add('active');
+            adminLoginError.style.display = 'none';
+            adminLoginSuccess.style.display = 'none';
+        }
+
+        // Login from modal
+        async function loginFromModal() {
+            const username = document.getElementById('modal-admin-username').value.trim();
+            const password = document.getElementById('modal-admin-password').value.trim();
+            
+            await performAdminLogin(username, password, 'modal');
+        }
+
+        // Login from help page
+        async function loginFromHelpPage() {
+            const username = document.getElementById('help-admin-username').value.trim();
+            const password = document.getElementById('help-admin-password').value.trim();
+            
+            await performAdminLogin(username, password, 'help');
+        }
+
+        // Perform Admin Login
+        async function performAdminLogin(username, password, source) {
+            if (!username || !password) {
+                showAdminLoginError('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
+                return;
+            }
+            
+            // Simple authentication
+            const adminAccounts = [
+                { username: "admin", password: "admin123", name: "ผู้ดูแลระบบ" },
+                { username: "teacher", password: "teacher123", name: "อาจารย์" }
+            ];
+            
+            const validAdmin = adminAccounts.find(admin => 
+                admin.username === username && admin.password === password
+            );
+            
+            if (validAdmin) {
+                // Save admin session
+                localStorage.setItem('admin_user', JSON.stringify(validAdmin));
+                
+                if (source === 'modal') {
+                    adminLoginSuccess.textContent = 'เข้าสู่ระบบสำเร็จ! กำลังเปลี่ยนเส้นทาง...';
+                    adminLoginSuccess.style.display = 'block';
+                    adminLoginError.style.display = 'none';
+                    
+                    setTimeout(() => {
+                        window.location.href = 'admin.html';
+                    }, 1000);
+                } else {
+                    // For help page login
+                    showMessage('เข้าสู่ระบบสำเร็จ', 'กำลังเปลี่ยนเส้นทางไปยังหน้าผู้ดูแลระบบ...');
+                    setTimeout(() => {
+                        window.location.href = 'admin.html';
+                    }, 1500);
+                }
+                
+            } else {
+                showAdminLoginError('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+            }
+        }
+
+        function showAdminLoginError(message) {
+            adminLoginError.textContent = message;
+            adminLoginError.style.display = 'block';
+            adminLoginSuccess.style.display = 'none';
         }
 
         // Initialize Sample Data
@@ -1217,7 +1359,7 @@
                 
                 let progressColor = '#34a853';
                 if (percentage >= 80) {
-                    progressColor = '#ea4335';
+                    progressColor = '#000000'; // เปลี่ยนเป็นสีดำเมื่อเต็ม
                 } else if (percentage >= 50) {
                     progressColor = '#fbbc04';
                 }
