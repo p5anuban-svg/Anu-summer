@@ -10,6 +10,16 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #1a73e8;
+            --primary-dark: #0d47a1;
+            --success: #34a853;
+            --warning: #fbbc04;
+            --danger: #ea4335;
+            --gray: #5f6368;
+            --light-gray: #f5f7fa;
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -18,7 +28,7 @@
         }
 
         body {
-            background-color: #f5f7fa;
+            background-color: var(--light-gray);
             color: #333;
             padding: 20px;
             line-height: 1.6;
@@ -34,7 +44,7 @@
         }
 
         header {
-            background: linear-gradient(135deg, #1a73e8, #0d47a1);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             padding: 20px 30px;
             position: relative;
@@ -44,15 +54,13 @@
             margin-bottom: 5px;
         }
 
-        .back-link {
+        .header-controls {
             position: absolute;
             top: 20px;
             right: 20px;
-            color: white;
-            text-decoration: none;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 8px 15px;
-            border-radius: 5px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
         }
 
         .admin-section {
@@ -70,25 +78,43 @@
             background: white;
             padding: 15px;
             border-radius: 8px;
-            border-left: 4px solid #1a73e8;
+            border-left: 4px solid var(--primary);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
         }
 
         .stat-value {
             font-size: 1.8rem;
             font-weight: bold;
-            color: #1a73e8;
+            color: var(--primary);
         }
 
         .stat-label {
             font-size: 0.9rem;
-            color: #666;
+            color: var(--gray);
             margin-top: 5px;
+        }
+
+        .stat-change {
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+
+        .stat-change.positive {
+            color: var(--success);
+        }
+
+        .stat-change.negative {
+            color: var(--danger);
         }
 
         .admin-controls {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
@@ -103,9 +129,12 @@
 
         .admin-control h3 {
             margin-bottom: 15px;
-            color: #1a73e8;
-            border-bottom: 2px solid #1a73e8;
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
             padding-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .form-group {
@@ -116,42 +145,101 @@
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
+            color: #444;
         }
 
         .form-group input, .form-group select, .form-group textarea {
             width: 100%;
             padding: 10px;
-            border: 1px solid #ddd;
+            border: 2px solid #ddd;
             border-radius: 5px;
             font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
         }
 
         .btn {
             display: inline-block;
             padding: 10px 20px;
-            background-color: #1a73e8;
+            background-color: var(--primary);
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             font-weight: bold;
-            margin: 5px;
             text-decoration: none;
+            transition: all 0.3s;
+            margin: 5px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
-        .btn:hover { background-color: #0d62d9; }
-        .btn-secondary { background-color: #5f6368; }
-        .btn-secondary:hover { background-color: #4a4d52; }
-        .btn-danger { background-color: #ea4335; }
-        .btn-danger:hover { background-color: #d33426; }
-        .btn-success { background-color: #34a853; }
-        .btn-success:hover { background-color: #2e8b47; }
+        .btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-secondary {
+            background-color: var(--gray);
+        }
+
+        .btn-secondary:hover {
+            background-color: #4a4d52;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background-color: #d33426;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+        }
+
+        .btn-success:hover {
+            background-color: #2e8b47;
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            background-color: #e6a700;
+        }
+
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 0.9rem;
+        }
 
         .data-table-container {
             overflow-x: auto;
             margin-top: 20px;
             border: 1px solid #ddd;
             border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .data-table {
@@ -161,17 +249,20 @@
         }
 
         .data-table th {
-            background-color: #1a73e8;
+            background-color: var(--primary);
             color: white;
             padding: 12px 15px;
             text-align: left;
+            font-weight: 600;
             position: sticky;
             top: 0;
+            white-space: nowrap;
         }
 
         .data-table td {
             border: 1px solid #e0e0e0;
             padding: 10px 15px;
+            vertical-align: middle;
         }
 
         .data-table tr:nth-child(even) {
@@ -185,6 +276,7 @@
         .action-buttons {
             display: flex;
             gap: 5px;
+            flex-wrap: wrap;
         }
 
         .search-filter {
@@ -192,6 +284,44 @@
             gap: 10px;
             margin-bottom: 20px;
             flex-wrap: wrap;
+            align-items: center;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .badge-success {
+            background: #e6f4ea;
+            color: var(--success);
+        }
+
+        .badge-danger {
+            background: #fdecea;
+            color: var(--danger);
+        }
+
+        .badge-warning {
+            background: #fef7e0;
+            color: #b06c00;
+        }
+
+        .badge-info {
+            background: #e8f0fe;
+            color: var(--primary);
         }
 
         .login-form {
@@ -205,24 +335,35 @@
         }
 
         .login-form h2 {
-            color: #1a73e8;
+            color: var(--primary);
             margin-bottom: 20px;
         }
 
         .error-message {
             background-color: #fdecea;
-            color: #ea4335;
+            color: var(--danger);
             padding: 10px;
             border-radius: 5px;
             margin-bottom: 15px;
+            display: none;
+        }
+
+        .success-message {
+            background-color: #e6f4ea;
+            color: var(--success);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
         }
 
         footer {
             text-align: center;
             padding: 20px;
-            color: #666;
+            color: var(--gray);
             border-top: 1px solid #eee;
             margin-top: 30px;
+            background: #f8f9fa;
         }
 
         .modal {
@@ -248,6 +389,40 @@
             border-radius: 10px;
             width: 90%;
             max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .close-modal {
+            float: right;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
+        .close-modal:hover {
+            color: var(--danger);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         @media (max-width: 768px) {
@@ -255,8 +430,35 @@
                 grid-template-columns: 1fr;
             }
             
+            .form-row {
+                flex-direction: column;
+            }
+            
             .search-filter {
                 flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .header-controls {
+                position: static;
+                margin-top: 15px;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .admin-section {
+                padding: 15px;
+            }
+            
+            .data-table th, .data-table td {
+                padding: 8px 10px;
+                font-size: 0.9rem;
+            }
+            
+            .btn {
+                padding: 8px 15px;
+                font-size: 0.9rem;
             }
         }
     </style>
@@ -266,38 +468,47 @@
         <header>
             <h1><i class="fas fa-user-shield"></i> ระบบผู้ดูแล</h1>
             <p>ระบบจองที่นั่งเรียน - ส่วนผู้ดูแลระบบ</p>
-            <a href="index.html" class="back-link">
-                <i class="fas fa-arrow-left"></i> กลับหน้าหลัก
-            </a>
+            <div class="header-controls">
+                <a href="index.html" class="btn btn-secondary btn-small">
+                    <i class="fas fa-arrow-left"></i> กลับหน้าหลัก
+                </a>
+                <button class="btn btn-warning btn-small" id="btn-refresh-all">
+                    <i class="fas fa-sync-alt"></i> รีเฟรช
+                </button>
+            </div>
         </header>
 
         <!-- Login Section -->
         <div id="login-section" class="login-form">
             <h2><i class="fas fa-lock"></i> เข้าสู่ระบบผู้ดูแล</h2>
-            <div id="login-error" class="error-message" style="display: none;"></div>
+            <div id="login-error" class="error-message"></div>
+            <div id="login-success" class="success-message"></div>
             <div class="form-group">
                 <label for="admin-username">ชื่อผู้ใช้</label>
-                <input type="text" id="admin-username" placeholder="admin">
+                <input type="text" id="admin-username" placeholder="admin" value="admin">
             </div>
             <div class="form-group">
                 <label for="admin-password">รหัสผ่าน</label>
-                <input type="password" id="admin-password" placeholder="admin123">
+                <input type="password" id="admin-password" placeholder="admin123" value="admin123">
             </div>
             <button class="btn" id="btn-login" style="width: 100%;">
                 <i class="fas fa-sign-in-alt"></i> เข้าสู่ระบบ
             </button>
-            <p style="margin-top: 15px; color: #666; font-size: 0.9rem;">
-                * สำหรับผู้ดูแลระบบเท่านั้น
+            <p style="margin-top: 15px; color: var(--gray); font-size: 0.9rem;">
+                <i class="fas fa-info-circle"></i> สำหรับผู้ดูแลระบบเท่านั้น
             </p>
         </div>
 
         <!-- Admin Dashboard -->
         <div id="admin-dashboard" class="admin-section" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2><i class="fas fa-tachometer-alt"></i> แผงควบคุม</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                 <div>
-                    <span style="color: #666; margin-right: 10px;">สวัสดี, <span id="admin-name"></span></span>
-                    <button class="btn btn-secondary" id="btn-logout">
+                    <h2><i class="fas fa-tachometer-alt"></i> แผงควบคุมผู้ดูแลระบบ</h2>
+                    <p style="color: var(--gray); margin-top: 5px;">ข้อมูลอัพเดตล่าสุด: <span id="last-update">-</span></p>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <span style="color: var(--gray);">สวัสดี, <strong id="admin-name"></strong></span>
+                    <button class="btn btn-secondary btn-small" id="btn-logout">
                         <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
                     </button>
                 </div>
@@ -308,43 +519,51 @@
                 <!-- Stats will be loaded here -->
             </div>
 
-            <!-- Course Management -->
+            <!-- Main Controls -->
             <div class="admin-controls">
+                <!-- Course Management -->
                 <div class="admin-control">
-                    <h3><i class="fas fa-book"></i> จัดการวิชา</h3>
+                    <h3><i class="fas fa-book"></i> จัดการวิชาเรียน</h3>
                     <div class="form-group">
                         <label for="course-id">รหัสวิชา</label>
-                        <input type="text" id="course-id" placeholder="CS101">
+                        <input type="text" id="course-id" placeholder="เช่น CS101">
                     </div>
                     <div class="form-group">
                         <label for="course-name">ชื่อวิชา</label>
-                        <input type="text" id="course-name" placeholder="การเขียนโปรแกรม">
+                        <input type="text" id="course-name" placeholder="ชื่อวิชา">
                     </div>
-                    <div style="display: flex; gap: 10px;">
-                        <div class="form-group" style="flex: 1;">
+                    <div class="form-row">
+                        <div class="form-group">
                             <label for="course-seats">จำนวนที่นั่ง</label>
-                            <input type="number" id="course-seats" placeholder="30" min="1">
+                            <input type="number" id="course-seats" placeholder="30" min="1" max="200">
                         </div>
-                        <div class="form-group" style="flex: 1;">
-                            <label for="course-instructor">อาจารย์</label>
-                            <input type="text" id="course-instructor" placeholder="อาจารย์สมชาย">
+                        <div class="form-group">
+                            <label for="course-instructor">อาจารย์ผู้สอน</label>
+                            <input type="text" id="course-instructor" placeholder="ชื่ออาจารย์">
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="course-time">เวลาเรียน</label>
-                        <input type="text" id="course-time" placeholder="จันทร์ 09:00-12:00">
+                        <input type="text" id="course-time" placeholder="เช่น จันทร์ 09:00-12:00">
                     </div>
-                    <button class="btn btn-success" id="btn-add-course">
-                        <i class="fas fa-plus"></i> เพิ่มวิชา
-                    </button>
-                    <button class="btn" id="btn-update-course">
-                        <i class="fas fa-edit"></i> อัพเดต
-                    </button>
-                    <button class="btn btn-danger" id="btn-delete-course">
-                        <i class="fas fa-trash"></i> ลบวิชา
-                    </button>
+                    <div class="form-group">
+                        <label for="course-description">คำอธิบาย</label>
+                        <textarea id="course-description" rows="2" placeholder="คำอธิบายวิชา"></textarea>
+                    </div>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-success" id="btn-add-course">
+                            <i class="fas fa-plus"></i> เพิ่มวิชาใหม่
+                        </button>
+                        <button class="btn" id="btn-update-course">
+                            <i class="fas fa-edit"></i> อัพเดตวิชา
+                        </button>
+                        <button class="btn btn-danger" id="btn-delete-course">
+                            <i class="fas fa-trash"></i> ลบวิชา
+                        </button>
+                    </div>
                 </div>
 
+                <!-- Search Bookings -->
                 <div class="admin-control">
                     <h3><i class="fas fa-search"></i> ค้นหาการจอง</h3>
                     <div class="form-group">
@@ -354,37 +573,42 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="filter-date">วันที่</label>
+                        <label for="filter-date">วันที่จอง</label>
                         <input type="date" id="filter-date">
                     </div>
                     <div class="form-group">
-                        <label for="search-text">ค้นหา</label>
-                        <input type="text" id="search-text" placeholder="ค้นหาชื่อหรือห้องเรียน">
+                        <label for="filter-search">ค้นหา (ชื่อ/ห้องเรียน)</label>
+                        <input type="text" id="filter-search" placeholder="ค้นหาชื่อหรือห้องเรียน...">
                     </div>
-                    <button class="btn" id="btn-search">
-                        <i class="fas fa-search"></i> ค้นหา
-                    </button>
-                    <button class="btn btn-success" id="btn-export">
-                        <i class="fas fa-download"></i> ดาวน์โหลด Excel
-                    </button>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn" id="btn-search">
+                            <i class="fas fa-search"></i> ค้นหา
+                        </button>
+                        <button class="btn btn-success" id="btn-export-excel">
+                            <i class="fas fa-file-excel"></i> ดาวน์โหลด Excel
+                        </button>
+                    </div>
                 </div>
 
+                <!-- Data Management -->
                 <div class="admin-control">
-                    <h3><i class="fas fa-trash-alt"></i> จัดการข้อมูล</h3>
+                    <h3><i class="fas fa-database"></i> จัดการข้อมูล</h3>
                     <div class="form-group">
-                        <label for="select-booking">เลือกการจองที่จะลบ</label>
-                        <select id="select-booking">
-                            <option value="">เลือกรายการ</option>
+                        <label for="select-booking-delete">เลือกรายการจองที่จะลบ</label>
+                        <select id="select-booking-delete">
+                            <option value="">เลือกรายการ...</option>
                         </select>
                     </div>
-                    <button class="btn btn-danger" id="btn-delete-booking">
-                        <i class="fas fa-trash"></i> ลบการจอง
-                    </button>
-                    <button class="btn btn-danger" id="btn-clear-all" style="margin-top: 10px;">
-                        <i class="fas fa-broom"></i> ล้างข้อมูลทั้งหมด
-                    </button>
-                    <p style="margin-top: 15px; color: #666; font-size: 0.85rem;">
-                        * การลบข้อมูลไม่สามารถกู้คืนได้
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px;">
+                        <button class="btn btn-danger" id="btn-delete-booking">
+                            <i class="fas fa-trash"></i> ลบรายการที่เลือก
+                        </button>
+                        <button class="btn btn-danger" id="btn-clear-bookings">
+                            <i class="fas fa-broom"></i> ล้างข้อมูลทั้งหมด
+                        </button>
+                    </div>
+                    <p style="margin-top: 15px; color: var(--danger); font-size: 0.85rem;">
+                        <i class="fas fa-exclamation-triangle"></i> การลบข้อมูลไม่สามารถกู้คืนได้
                     </p>
                 </div>
             </div>
@@ -392,50 +616,54 @@
             <!-- Courses Table -->
             <h3><i class="fas fa-list"></i> รายการวิชาทั้งหมด</h3>
             <div class="data-table-container">
-                <table class="data-table">
+                <table class="data-table" id="courses-table">
                     <thead>
                         <tr>
-                            <th>รหัสวิชา</th>
+                            <th width="100">รหัสวิชา</th>
                             <th>ชื่อวิชา</th>
-                            <th>ที่นั่ง</th>
-                            <th>อาจารย์</th>
-                            <th>เวลา</th>
-                            <th>การจัดการ</th>
+                            <th width="100">จำนวนที่นั่ง</th>
+                            <th>อาจารย์ผู้สอน</th>
+                            <th width="120">เวลาเรียน</th>
+                            <th width="150">การจัดการ</th>
                         </tr>
                     </thead>
-                    <tbody id="courses-table">
+                    <tbody id="courses-table-body">
                         <!-- Courses will be loaded here -->
                     </tbody>
                 </table>
             </div>
 
             <!-- Bookings Table -->
-            <h3 style="margin-top: 30px;"><i class="fas fa-calendar-check"></i> ข้อมูลการจอง</h3>
+            <h3 style="margin-top: 30px;"><i class="fas fa-calendar-check"></i> ข้อมูลการจองทั้งหมด</h3>
             <div class="search-filter">
-                <input type="text" id="search-bookings" placeholder="ค้นหา..." style="flex: 1;">
+                <div class="search-box">
+                    <input type="text" id="search-bookings" placeholder="ค้นหาชื่อ, ห้องเรียน, รหัสวิชา..." style="width: 100%;">
+                </div>
                 <select id="sort-bookings">
                     <option value="newest">วันที่ล่าสุด</option>
                     <option value="oldest">วันที่เก่าสุด</option>
                     <option value="name">ชื่อ A-Z</option>
+                    <option value="course">รหัสวิชา</option>
                 </select>
-                <button class="btn" id="btn-refresh">
+                <button class="btn btn-secondary" id="btn-refresh-bookings">
                     <i class="fas fa-sync-alt"></i> รีเฟรช
                 </button>
             </div>
+            
             <div class="data-table-container">
-                <table class="data-table">
+                <table class="data-table" id="bookings-table">
                     <thead>
                         <tr>
-                            <th>ชื่อนักเรียน</th>
-                            <th>ห้องเรียน</th>
-                            <th>ที่นั่ง</th>
-                            <th>รหัสวิชา</th>
-                            <th>วันที่จอง</th>
-                            <th>เวลา</th>
-                            <th>จัดการ</th>
+                            <th width="150">ชื่อ-นามสกุล</th>
+                            <th width="100">ห้องเรียน</th>
+                            <th width="80">เลขที่นั่ง</th>
+                            <th width="120">รหัสวิชา</th>
+                            <th width="150">วันที่จอง</th>
+                            <th width="120">เวลา</th>
+                            <th width="100">จัดการ</th>
                         </tr>
                     </thead>
-                    <tbody id="bookings-table">
+                    <tbody id="bookings-table-body">
                         <!-- Bookings will be loaded here -->
                     </tbody>
                 </table>
@@ -443,19 +671,34 @@
         </div>
 
         <footer>
-            <p>ระบบจองที่นั่งเรียน - ผู้ดูแลระบบ &copy; 2023</p>
+            <p>ระบบจองที่นั่งเรียน - ส่วนผู้ดูแลระบบ &copy; 2023</p>
+            <p style="font-size: 0.8rem; color: var(--gray); margin-top: 5px;">
+                <i class="fas fa-database"></i> Firestore | 
+                <i class="fas fa-bolt"></i> Real-time Updates |
+                <i class="fas fa-shield-alt"></i> Secure Admin
+            </p>
         </footer>
     </div>
 
     <!-- Confirmation Modal -->
     <div id="confirm-modal" class="modal">
         <div class="modal-content">
-            <h2 id="confirm-title">ยืนยันการลบ</h2>
+            <span class="close-modal" id="close-confirm">&times;</span>
+            <h2 id="confirm-title">ยืนยันการดำเนินการ</h2>
             <p id="confirm-message"></p>
             <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button class="btn btn-danger" id="btn-confirm">ยืนยัน</button>
-                <button class="btn btn-secondary" id="btn-cancel">ยกเลิก</button>
+                <button class="btn btn-danger" id="btn-confirm-delete">ยืนยัน</button>
+                <button class="btn btn-secondary" id="btn-cancel-delete">ยกเลิก</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Message Modal -->
+    <div id="message-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="message-title">ข้อความ</h2>
+            <p id="message-text"></p>
+            <button class="btn" id="btn-close-message" style="margin-top: 20px;">ตกลง</button>
         </div>
     </div>
 
@@ -479,16 +722,25 @@
         let allCourses = {};
         let allBookings = {};
         let selectedBookingId = null;
+        let isConnected = false;
+        let lastStats = {
+            totalCourses: 0,
+            totalBookings: 0,
+            todayBookings: 0
+        };
 
         // DOM Elements
         const loginSection = document.getElementById('login-section');
         const adminDashboard = document.getElementById('admin-dashboard');
         const adminNameElement = document.getElementById('admin-name');
+        const lastUpdateElement = document.getElementById('last-update');
         const btnLogin = document.getElementById('btn-login');
         const btnLogout = document.getElementById('btn-logout');
+        const btnRefreshAll = document.getElementById('btn-refresh-all');
         const usernameInput = document.getElementById('admin-username');
         const passwordInput = document.getElementById('admin-password');
         const loginError = document.getElementById('login-error');
+        const loginSuccess = document.getElementById('login-success');
         
         // Course Management
         const courseIdInput = document.getElementById('course-id');
@@ -496,63 +748,140 @@
         const courseSeatsInput = document.getElementById('course-seats');
         const courseInstructorInput = document.getElementById('course-instructor');
         const courseTimeInput = document.getElementById('course-time');
+        const courseDescriptionInput = document.getElementById('course-description');
         const btnAddCourse = document.getElementById('btn-add-course');
         const btnUpdateCourse = document.getElementById('btn-update-course');
         const btnDeleteCourse = document.getElementById('btn-delete-course');
-        const coursesTable = document.getElementById('courses-table');
+        const coursesTableBody = document.getElementById('courses-table-body');
         
         // Booking Management
         const filterCourseSelect = document.getElementById('filter-course');
         const filterDateInput = document.getElementById('filter-date');
-        const searchTextInput = document.getElementById('search-text');
-        const selectBooking = document.getElementById('select-booking');
+        const filterSearchInput = document.getElementById('filter-search');
+        const selectBookingDelete = document.getElementById('select-booking-delete');
         const searchBookingsInput = document.getElementById('search-bookings');
         const sortBookingsSelect = document.getElementById('sort-bookings');
         const btnSearch = document.getElementById('btn-search');
-        const btnExport = document.getElementById('btn-export');
+        const btnExportExcel = document.getElementById('btn-export-excel');
+        const btnClearBookings = document.getElementById('btn-clear-bookings');
         const btnDeleteBooking = document.getElementById('btn-delete-booking');
-        const btnClearAll = document.getElementById('btn-clear-all');
-        const btnRefresh = document.getElementById('btn-refresh');
-        const bookingsTable = document.getElementById('bookings-table');
+        const btnRefreshBookings = document.getElementById('btn-refresh-bookings');
+        const bookingsTableBody = document.getElementById('bookings-table-body');
         
         // Stats
         const statsContainer = document.getElementById('stats-container');
         
         // Modals
         const confirmModal = document.getElementById('confirm-modal');
+        const messageModal = document.getElementById('message-modal');
         const confirmTitle = document.getElementById('confirm-title');
         const confirmMessage = document.getElementById('confirm-message');
-        const btnConfirm = document.getElementById('btn-confirm');
-        const btnCancel = document.getElementById('btn-cancel');
+        const messageTitle = document.getElementById('message-title');
+        const messageText = document.getElementById('message-text');
+        const btnConfirmDelete = document.getElementById('btn-confirm-delete');
+        const btnCancelDelete = document.getElementById('btn-cancel-delete');
+        const btnCloseMessage = document.getElementById('btn-close-message');
+        const closeConfirm = document.getElementById('close-confirm');
 
         // Event Listeners
         document.addEventListener('DOMContentLoaded', initializeAdminSystem);
         btnLogin.addEventListener('click', loginAdmin);
         btnLogout.addEventListener('click', logoutAdmin);
+        btnRefreshAll.addEventListener('click', refreshAllData);
         btnAddCourse.addEventListener('click', addCourse);
         btnUpdateCourse.addEventListener('click', updateCourse);
         btnDeleteCourse.addEventListener('click', deleteCourse);
         btnSearch.addEventListener('click', searchBookings);
-        btnExport.addEventListener('click', exportToExcel);
-        btnDeleteBooking.addEventListener('click', deleteSelectedBooking);
-        btnClearAll.addEventListener('click', clearAllBookings);
-        btnRefresh.addEventListener('click', refreshData);
-        btnConfirm.addEventListener('click', executeConfirmAction);
-        btnCancel.addEventListener('click', () => confirmModal.classList.remove('active'));
+        btnExportExcel.addEventListener('click', exportToExcel);
+        btnClearBookings.addEventListener('click', clearBookings);
+        btnDeleteBooking.addEventListener('click', showDeleteBookingModal);
+        btnRefreshBookings.addEventListener('click', refreshBookings);
+        btnConfirmDelete.addEventListener('click', confirmDeleteAction);
+        btnCancelDelete.addEventListener('click', () => confirmModal.classList.remove('active'));
+        btnCloseMessage.addEventListener('click', () => messageModal.classList.remove('active'));
+        closeConfirm.addEventListener('click', () => confirmModal.classList.remove('active'));
         
+        // Search and filter listeners
+        searchBookingsInput.addEventListener('input', filterBookings);
+        filterCourseSelect.addEventListener('change', filterBookings);
+        filterDateInput.addEventListener('change', filterBookings);
+        sortBookingsSelect.addEventListener('change', filterBookings);
+
         // Initialize Admin System
-        function initializeAdminSystem() {
-            // Check if already logged in
+        async function initializeAdminSystem() {
+            // Check if admin is already logged in
             const savedAdmin = localStorage.getItem('admin_user');
             if (savedAdmin) {
                 currentAdmin = JSON.parse(savedAdmin);
                 showAdminDashboard();
-                loadData();
+                initializeData();
+            }
+            
+            updateLastUpdateTime();
+        }
+
+        // Initialize Data
+        async function initializeData() {
+            try {
+                // Test connection
+                await db.collection('test').add({ test: Date.now() });
+                isConnected = true;
+                
+                // Setup real-time listeners
+                setupRealtimeListeners();
+                
+                // Initial load
+                await loadCourses();
+                await loadBookings();
+                
+            } catch (error) {
+                console.error("Connection error:", error);
+                isConnected = false;
+                showMessage("ข้อผิดพลาด", "ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้");
             }
         }
 
-        // Admin Login
-        function loginAdmin() {
+        // Setup Real-time Listeners
+        function setupRealtimeListeners() {
+            // Courses listener
+            db.collection("courses").onSnapshot(snapshot => {
+                if (!isConnected) return;
+                
+                allCourses = {};
+                snapshot.forEach(doc => {
+                    allCourses[doc.id] = { id: doc.id, ...doc.data() };
+                });
+                
+                updateCoursesTable();
+                updateCourseFilter();
+                updateStats();
+                updateLastUpdateTime();
+                
+            }, error => {
+                console.error("Courses listener error:", error);
+            });
+
+            // Bookings listener
+            db.collection("bookings").onSnapshot(snapshot => {
+                if (!isConnected) return;
+                
+                allBookings = {};
+                snapshot.forEach(doc => {
+                    allBookings[doc.id] = { id: doc.id, ...doc.data() };
+                });
+                
+                updateBookingsTable();
+                updateBookingDeleteSelect();
+                updateStats();
+                updateLastUpdateTime();
+                
+            }, error => {
+                console.error("Bookings listener error:", error);
+            });
+        }
+
+        // Admin Authentication
+        async function loginAdmin() {
             const username = usernameInput.value.trim();
             const password = passwordInput.value.trim();
             
@@ -567,28 +896,31 @@
                 { username: "teacher", password: "teacher123", name: "อาจารย์" }
             ];
             
-            const validAdmin = adminAccounts.find(acc => 
-                acc.username === username && acc.password === password
+            const validAdmin = adminAccounts.find(admin => 
+                admin.username === username && admin.password === password
             );
             
             if (validAdmin) {
                 currentAdmin = validAdmin;
                 localStorage.setItem('admin_user', JSON.stringify(currentAdmin));
-                showAdminDashboard();
-                loadData();
+                
+                showLoginSuccess("เข้าสู่ระบบสำเร็จ!");
+                setTimeout(() => {
+                    showAdminDashboard();
+                    initializeData();
+                }, 1000);
+                
             } else {
                 showLoginError("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
             }
         }
 
-        // Logout
         function logoutAdmin() {
             currentAdmin = null;
             localStorage.removeItem('admin_user');
             showLoginForm();
         }
 
-        // Show/Hide Sections
         function showAdminDashboard() {
             loginSection.style.display = 'none';
             adminDashboard.style.display = 'block';
@@ -601,21 +933,22 @@
             usernameInput.value = '';
             passwordInput.value = '';
             loginError.style.display = 'none';
+            loginSuccess.style.display = 'none';
         }
 
         function showLoginError(message) {
             loginError.textContent = message;
             loginError.style.display = 'block';
+            loginSuccess.style.display = 'none';
         }
 
-        // Load Data
-        async function loadData() {
-            await loadCourses();
-            await loadBookings();
-            updateStats();
+        function showLoginSuccess(message) {
+            loginSuccess.textContent = message;
+            loginSuccess.style.display = 'block';
+            loginError.style.display = 'none';
         }
 
-        // Load Courses
+        // Course Management
         async function loadCourses() {
             try {
                 const snapshot = await db.collection("courses").get();
@@ -625,31 +958,27 @@
                 });
                 updateCoursesTable();
                 updateCourseFilter();
+                
             } catch (error) {
                 console.error("Error loading courses:", error);
-                alert("ไม่สามารถโหลดข้อมูลวิชาได้");
+                showMessage("ข้อผิดพลาด", "ไม่สามารถโหลดข้อมูลวิชาได้");
             }
         }
 
-        // Load Bookings
-        async function loadBookings() {
-            try {
-                const snapshot = await db.collection("bookings").orderBy("bookingTime", "desc").get();
-                allBookings = {};
-                snapshot.forEach(doc => {
-                    allBookings[doc.id] = { id: doc.id, ...doc.data() };
-                });
-                updateBookingsTable();
-                updateBookingSelect();
-            } catch (error) {
-                console.error("Error loading bookings:", error);
-                alert("ไม่สามารถโหลดข้อมูลการจองได้");
-            }
-        }
-
-        // Update Courses Table
         function updateCoursesTable() {
-            coursesTable.innerHTML = '';
+            coursesTableBody.innerHTML = '';
+            
+            if (Object.keys(allCourses).length === 0) {
+                coursesTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px; color: var(--gray);">
+                            <i class="fas fa-book" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                            ยังไม่มีข้อมูลวิชา
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
             
             for (const courseId in allCourses) {
                 const course = allCourses[courseId];
@@ -662,211 +991,140 @@
                     }
                 }
                 
+                const percentage = Math.round((bookingCount / course.totalSeats) * 100);
+                let statusClass = 'badge-success';
+                if (percentage >= 80) statusClass = 'badge-danger';
+                else if (percentage >= 50) statusClass = 'badge-warning';
+                
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td><strong>${courseId}</strong></td>
-                    <td>${course.name}</td>
-                    <td>${bookingCount}/${course.totalSeats}</td>
+                    <td>
+                        <div><strong>${course.name}</strong></div>
+                        <small style="color: var(--gray);">${course.description || ''}</small>
+                    </td>
+                    <td>
+                        <div>${bookingCount}/${course.totalSeats}</div>
+                        <span class="badge ${statusClass}">${percentage}%</span>
+                    </td>
                     <td>${course.instructor || '-'}</td>
                     <td>${course.time || '-'}</td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn btn-secondary" onclick="editCourse('${courseId}')" style="padding: 5px 10px;">
-                                แก้ไข
+                            <button class="btn btn-secondary btn-small" onclick="editCourse('${courseId}')">
+                                <i class="fas fa-edit"></i> แก้ไข
                             </button>
-                            <button class="btn btn-danger" onclick="showDeleteCourseConfirm('${courseId}')" style="padding: 5px 10px;">
-                                ลบ
+                            <button class="btn btn-danger btn-small" onclick="showDeleteCourseModal('${courseId}')">
+                                <i class="fas fa-trash"></i> ลบ
+                            </button>
+                            <button class="btn btn-small" onclick="viewCourseBookings('${courseId}')" style="background: #e8f0fe; color: var(--primary);">
+                                <i class="fas fa-eye"></i> ดูการจอง
                             </button>
                         </div>
                     </td>
                 `;
-                coursesTable.appendChild(row);
+                coursesTableBody.appendChild(row);
             }
         }
 
-        // Update Bookings Table
-        function updateBookingsTable(bookings = null) {
-            const displayBookings = bookings || Object.values(allBookings);
-            bookingsTable.innerHTML = '';
-            
-            displayBookings.forEach(booking => {
-                const bookingTime = new Date(booking.bookingTime);
-                const formattedDate = bookingTime.toLocaleDateString('th-TH');
-                const formattedTime = bookingTime.toLocaleTimeString('th-TH');
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${booking.studentName}</td>
-                    <td>${booking.studentClass}</td>
-                    <td>${booking.seatNumber}</td>
-                    <td>${booking.courseId}</td>
-                    <td>${formattedDate}</td>
-                    <td>${formattedTime}</td>
-                    <td>
-                        <button class="btn btn-danger" onclick="showDeleteBookingConfirm('${booking.id}')" style="padding: 5px 10px;">
-                            ลบ
-                        </button>
-                    </td>
-                `;
-                bookingsTable.appendChild(row);
-            });
-        }
-
-        // Update Course Filter
-        function updateCourseFilter() {
-            filterCourseSelect.innerHTML = '<option value="">ทั้งหมด</option>';
-            
-            for (const courseId in allCourses) {
-                const option = document.createElement('option');
-                option.value = courseId;
-                option.textContent = `${courseId} - ${allCourses[courseId].name}`;
-                filterCourseSelect.appendChild(option);
-            }
-        }
-
-        // Update Booking Select
-        function updateBookingSelect() {
-            selectBooking.innerHTML = '<option value="">เลือกรายการ</option>';
-            
-            Object.values(allBookings).forEach(booking => {
-                const option = document.createElement('option');
-                option.value = booking.id;
-                option.textContent = `${booking.studentName} - ${booking.courseId} (ที่นั่ง ${booking.seatNumber})`;
-                selectBooking.appendChild(option);
-            });
-        }
-
-        // Update Statistics
-        function updateStats() {
-            const totalCourses = Object.keys(allCourses).length;
-            const totalBookings = Object.keys(allBookings).length;
-            
-            let todayBookings = 0;
-            const today = new Date().toISOString().split('T')[0];
-            
-            Object.values(allBookings).forEach(booking => {
-                if (booking.bookingDate === today) {
-                    todayBookings++;
-                }
-            });
-            
-            statsContainer.innerHTML = `
-                <div class="stat-card">
-                    <div class="stat-value">${totalCourses}</div>
-                    <div class="stat-label">วิชาทั้งหมด</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${totalBookings}</div>
-                    <div class="stat-label">การจองทั้งหมด</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${todayBookings}</div>
-                    <div class="stat-label">จองวันนี้</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${Math.round((totalBookings / (totalCourses * 30)) * 100)}%</div>
-                    <div class="stat-label">อัตราการจอง</div>
-                </div>
-            `;
-        }
-
-        // Add Course
         async function addCourse() {
-            const id = courseIdInput.value.trim().toUpperCase();
+            const code = courseIdInput.value.trim().toUpperCase();
             const name = courseNameInput.value.trim();
             const seats = parseInt(courseSeatsInput.value);
             const instructor = courseInstructorInput.value.trim();
             const time = courseTimeInput.value.trim();
+            const description = courseDescriptionInput.value.trim();
             
-            if (!id || !name || !seats || seats < 1) {
-                alert("กรุณากรอกรหัสวิชา, ชื่อวิชา, และจำนวนที่นั่งให้ครบถ้วน");
+            if (!code || !name || !seats || seats < 1) {
+                showMessage("ข้อผิดพลาด", "กรุณากรอกรหัสวิชา, ชื่อวิชา, และจำนวนที่นั่งให้ครบถ้วน");
                 return;
             }
             
             try {
-                // Check if course exists
-                const existing = await db.collection("courses").doc(id).get();
-                if (existing.exists) {
-                    alert(`รหัสวิชา ${id} มีอยู่แล้ว`);
+                // Check if course already exists
+                const courseDoc = await db.collection("courses").doc(code).get();
+                if (courseDoc.exists) {
+                    showMessage("ข้อผิดพลาด", `รหัสวิชา ${code} มีอยู่แล้ว`);
                     return;
                 }
                 
-                // Add course
-                await db.collection("courses").doc(id).set({
+                // Add new course
+                await db.collection("courses").doc(code).set({
                     name: name,
                     totalSeats: seats,
                     instructor: instructor,
                     time: time,
+                    description: description,
                     createdAt: new Date().toISOString()
                 });
                 
-                alert(`เพิ่มวิชา ${id} สำเร็จ`);
+                showMessage("สำเร็จ", `เพิ่มวิชา ${code} สำเร็จแล้ว`);
                 clearCourseForm();
-                loadData();
                 
             } catch (error) {
                 console.error("Error adding course:", error);
-                alert("ไม่สามารถเพิ่มวิชาได้");
+                showMessage("ข้อผิดพลาด", "ไม่สามารถเพิ่มวิชาได้");
             }
         }
 
-        // Update Course
         async function updateCourse() {
-            const id = courseIdInput.value.trim().toUpperCase();
+            const code = courseIdInput.value.trim().toUpperCase();
             
-            if (!id) {
-                alert("กรุณากรอกรหัสวิชาที่ต้องการอัพเดต");
+            if (!code) {
+                showMessage("ข้อผิดพลาด", "กรุณากรอกรหัสวิชาที่ต้องการอัพเดต");
                 return;
             }
             
+            const name = courseNameInput.value.trim();
+            const seats = parseInt(courseSeatsInput.value);
+            const instructor = courseInstructorInput.value.trim();
+            const time = courseTimeInput.value.trim();
+            const description = courseDescriptionInput.value.trim();
+            
             try {
                 // Check if course exists
-                const existing = await db.collection("courses").doc(id).get();
-                if (!existing.exists) {
-                    alert(`ไม่พบวิชา ${id}`);
+                const courseDoc = await db.collection("courses").doc(code).get();
+                if (!courseDoc.exists) {
+                    showMessage("ข้อผิดพลาด", `ไม่พบวิชา ${code} ในระบบ`);
                     return;
                 }
                 
-                const name = courseNameInput.value.trim();
-                const seats = parseInt(courseSeatsInput.value);
-                const instructor = courseInstructorInput.value.trim();
-                const time = courseTimeInput.value.trim();
-                
+                // Update course
                 const updateData = {};
                 if (name) updateData.name = name;
-                if (seats > 0) updateData.totalSeats = seats;
+                if (seats && seats > 0) updateData.totalSeats = seats;
                 if (instructor) updateData.instructor = instructor;
                 if (time) updateData.time = time;
+                if (description) updateData.description = description;
                 
-                await db.collection("courses").doc(id).update(updateData);
+                await db.collection("courses").doc(code).update(updateData);
                 
-                alert(`อัพเดตวิชา ${id} สำเร็จ`);
+                showMessage("สำเร็จ", `อัพเดตวิชา ${code} สำเร็จแล้ว`);
                 clearCourseForm();
-                loadData();
                 
             } catch (error) {
                 console.error("Error updating course:", error);
-                alert("ไม่สามารถอัพเดตวิชาได้");
+                showMessage("ข้อผิดพลาด", "ไม่สามารถอัพเดตวิชาได้");
             }
         }
 
-        // Delete Course
         async function deleteCourse() {
-            const id = courseIdInput.value.trim().toUpperCase();
+            const code = courseIdInput.value.trim().toUpperCase();
             
-            if (!id) {
-                alert("กรุณากรอกรหัสวิชาที่ต้องการลบ");
+            if (!code) {
+                showMessage("ข้อผิดพลาด", "กรุณากรอกรหัสวิชาที่ต้องการลบ");
                 return;
             }
             
             showConfirmModal(
                 "ยืนยันการลบวิชา",
-                `คุณแน่ใจหรือไม่ว่าต้องการลบวิชา ${id}? การลบวิชาจะลบข้อมูลการจองทั้งหมดในวิชานี้ด้วย`,
+                `คุณแน่ใจหรือไม่ว่าต้องการลบวิชา ${code}?<br><br>
+                 <strong>คำเตือน:</strong> การลบวิชาจะลบข้อมูลการจองทั้งหมดในวิชานี้ด้วย!`,
                 async () => {
                     try {
                         // Delete all bookings for this course
                         const bookingsSnapshot = await db.collection("bookings")
-                            .where("courseId", "==", id)
+                            .where("courseId", "==", code)
                             .get();
                         
                         const batch = db.batch();
@@ -875,27 +1133,150 @@
                         });
                         
                         // Delete the course
-                        batch.delete(db.collection("courses").doc(id));
+                        batch.delete(db.collection("courses").doc(code));
                         
                         await batch.commit();
                         
-                        alert(`ลบวิชา ${id} สำเร็จ`);
+                        showMessage("สำเร็จ", `ลบวิชา ${code} สำเร็จแล้ว`);
                         clearCourseForm();
-                        loadData();
                         
                     } catch (error) {
                         console.error("Error deleting course:", error);
-                        alert("ไม่สามารถลบวิชาได้");
+                        showMessage("ข้อผิดพลาด", "ไม่สามารถลบวิชาได้");
                     }
                 }
             );
         }
 
-        // Search Bookings
+        // Booking Management
+        async function loadBookings() {
+            try {
+                const snapshot = await db.collection("bookings").orderBy("bookingTime", "desc").get();
+                allBookings = {};
+                snapshot.forEach(doc => {
+                    allBookings[doc.id] = { id: doc.id, ...doc.data() };
+                });
+                updateBookingsTable();
+                updateBookingDeleteSelect();
+                
+            } catch (error) {
+                console.error("Error loading bookings:", error);
+                showMessage("ข้อผิดพลาด", "ไม่สามารถโหลดข้อมูลการจองได้");
+            }
+        }
+
+        function updateBookingsTable(bookings = null) {
+            const displayBookings = bookings || Object.values(allBookings);
+            bookingsTableBody.innerHTML = '';
+            
+            if (displayBookings.length === 0) {
+                bookingsTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: var(--gray);">
+                            <i class="fas fa-calendar" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                            ${Object.keys(allBookings).length === 0 ? 
+                                'ไม่พบข้อมูลการจอง' : 
+                                'ไม่พบข้อมูลที่ตรงกับการค้นหา'}
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            displayBookings.forEach(booking => {
+                const bookingTime = new Date(booking.bookingTime);
+                const formattedDate = bookingTime.toLocaleDateString('th-TH', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+                const formattedTime = bookingTime.toLocaleTimeString('th-TH', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <div><strong>${booking.studentName}</strong></div>
+                        <small style="color: var(--gray);">ID: ${booking.id.substring(0, 8)}</small>
+                    </td>
+                    <td>${booking.studentClass || '-'}</td>
+                    <td>
+                        <span class="badge badge-info">${booking.seatNumber}</span>
+                    </td>
+                    <td>
+                        <div><strong>${booking.courseId}</strong></div>
+                        <small style="color: var(--gray);">${allCourses[booking.courseId]?.name || ''}</small>
+                    </td>
+                    <td>
+                        <div>${formattedDate}</div>
+                        <small style="color: var(--gray);">${booking.bookingDate || ''}</small>
+                    </td>
+                    <td>${formattedTime}</td>
+                    <td>
+                        <button class="btn btn-danger btn-small" onclick="showDeleteBookingConfirm('${booking.id}')">
+                            <i class="fas fa-trash"></i> ลบ
+                        </button>
+                    </td>
+                `;
+                bookingsTableBody.appendChild(row);
+            });
+        }
+
+        function filterBookings() {
+            const searchTerm = searchBookingsInput.value.toLowerCase();
+            const courseFilter = filterCourseSelect.value;
+            const dateFilter = filterDateInput.value;
+            const sortBy = sortBookingsSelect.value;
+            
+            let filteredBookings = Object.values(allBookings);
+            
+            // Apply filters
+            if (searchTerm) {
+                filteredBookings = filteredBookings.filter(booking =>
+                    booking.studentName.toLowerCase().includes(searchTerm) ||
+                    booking.studentClass.toLowerCase().includes(searchTerm) ||
+                    booking.courseId.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            if (courseFilter) {
+                filteredBookings = filteredBookings.filter(booking =>
+                    booking.courseId === courseFilter
+                );
+            }
+            
+            if (dateFilter) {
+                filteredBookings = filteredBookings.filter(booking => {
+                    const bookingDate = new Date(booking.bookingTime).toISOString().split('T')[0];
+                    return bookingDate === dateFilter;
+                });
+            }
+            
+            // Apply sorting
+            switch(sortBy) {
+                case 'newest':
+                    filteredBookings.sort((a, b) => new Date(b.bookingTime) - new Date(a.bookingTime));
+                    break;
+                case 'oldest':
+                    filteredBookings.sort((a, b) => new Date(a.bookingTime) - new Date(b.bookingTime));
+                    break;
+                case 'name':
+                    filteredBookings.sort((a, b) => a.studentName.localeCompare(b.studentName));
+                    break;
+                case 'course':
+                    filteredBookings.sort((a, b) => a.courseId.localeCompare(b.courseId));
+                    break;
+            }
+            
+            updateBookingsTable(filteredBookings);
+        }
+
         function searchBookings() {
             const courseFilter = filterCourseSelect.value;
             const dateFilter = filterDateInput.value;
-            const searchText = searchTextInput.value.toLowerCase();
+            const searchText = filterSearchInput.value.toLowerCase();
             
             let filteredBookings = Object.values(allBookings);
             
@@ -917,49 +1298,25 @@
             updateBookingsTable(filteredBookings);
         }
 
-        // Export to Excel
-        function exportToExcel() {
-            let csvContent = "ลำดับ,ชื่อนักเรียน,ห้องเรียน,เลขที่นั่ง,รหัสวิชา,วันที่จอง,เวลา\n";
+        function updateBookingDeleteSelect() {
+            selectBookingDelete.innerHTML = '<option value="">เลือกรายการที่ต้องการลบ</option>';
             
-            Object.values(allBookings).forEach((booking, index) => {
+            Object.values(allBookings).forEach(booking => {
                 const bookingTime = new Date(booking.bookingTime);
-                const date = bookingTime.toLocaleDateString('th-TH');
-                const time = bookingTime.toLocaleTimeString('th-TH');
+                const formattedTime = bookingTime.toLocaleDateString('th-TH');
                 
-                csvContent += `${index + 1},"${booking.studentName}","${booking.studentClass}",${booking.seatNumber},"${booking.courseId}","${date}","${time}"\n`;
+                const option = document.createElement('option');
+                option.value = booking.id;
+                option.textContent = `${booking.studentName} - ${booking.courseId} (ที่นั่ง ${booking.seatNumber}) - ${formattedTime}`;
+                selectBookingDelete.appendChild(option);
             });
-            
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            
-            link.setAttribute('href', url);
-            link.setAttribute('download', `bookings_${new Date().toISOString().split('T')[0]}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            alert("ดาวน์โหลดข้อมูลสำเร็จ");
         }
 
-        // Delete Selected Booking
-        async function deleteSelectedBooking() {
-            const bookingId = selectBooking.value;
-            
-            if (!bookingId) {
-                alert("กรุณาเลือกรายการที่ต้องการลบ");
-                return;
-            }
-            
-            showDeleteBookingConfirm(bookingId);
-        }
-
-        // Clear All Bookings
-        async function clearAllBookings() {
+        async function clearBookings() {
             showConfirmModal(
                 "ยืนยันการล้างข้อมูลทั้งหมด",
-                "คุณแน่ใจหรือไม่ว่าต้องการล้างข้อมูลการจองทั้งหมด? การกระทำนี้ไม่สามารถกู้คืนได้!",
+                "คุณแน่ใจหรือไม่ว่าต้องการล้างข้อมูลการจองทั้งหมด?<br><br>" +
+                "<strong style='color: var(--danger);'>คำเตือน:</strong> การกระทำนี้ไม่สามารถกู้คืนได้!",
                 async () => {
                     try {
                         const snapshot = await db.collection("bookings").get();
@@ -971,73 +1328,235 @@
                         
                         await batch.commit();
                         
-                        alert("ล้างข้อมูลการจองทั้งหมดสำเร็จ");
-                        loadData();
+                        showMessage("สำเร็จ", "ล้างข้อมูลการจองทั้งหมดสำเร็จแล้ว");
                         
                     } catch (error) {
                         console.error("Error clearing bookings:", error);
-                        alert("ไม่สามารถล้างข้อมูลได้");
+                        showMessage("ข้อผิดพลาด", "ไม่สามารถล้างข้อมูลการจองได้");
                     }
                 }
             );
         }
 
-        // Refresh Data
-        function refreshData() {
-            loadData();
-            alert("รีเฟรชข้อมูลสำเร็จ");
+        function showDeleteBookingModal() {
+            const bookingId = selectBookingDelete.value;
+            
+            if (!bookingId) {
+                showMessage("ข้อผิดพลาด", "กรุณาเลือกรายการที่ต้องการลบ");
+                return;
+            }
+            
+            const booking = allBookings[bookingId];
+            if (!booking) return;
+            
+            showDeleteBookingConfirm(bookingId);
         }
 
-        // Clear Course Form
+        // Export to Excel
+        function exportToExcel() {
+            const courseFilter = filterCourseSelect.value;
+            const dateFilter = filterDateInput.value;
+            const searchText = filterSearchInput.value.toLowerCase();
+            
+            let exportBookings = Object.values(allBookings);
+            
+            if (courseFilter) {
+                exportBookings = exportBookings.filter(b => b.courseId === courseFilter);
+            }
+            
+            if (dateFilter) {
+                exportBookings = exportBookings.filter(b => b.bookingDate === dateFilter);
+            }
+            
+            if (searchText) {
+                exportBookings = exportBookings.filter(b => 
+                    b.studentName.toLowerCase().includes(searchText) ||
+                    b.studentClass.toLowerCase().includes(searchText)
+                );
+            }
+            
+            if (exportBookings.length === 0) {
+                showMessage("ข้อมูลว่าง", "ไม่มีข้อมูลที่จะดาวน์โหลด");
+                return;
+            }
+            
+            // Create CSV content
+            let csvContent = "ลำดับ,ชื่อ-นามสกุล,ห้องเรียน,เลขที่นั่ง,รหัสวิชา,ชื่อวิชา,วันที่จอง,เวลา\n";
+            
+            exportBookings.forEach((booking, index) => {
+                const bookingTime = new Date(booking.bookingTime);
+                const formattedTime = bookingTime.toLocaleString('th-TH');
+                const courseName = allCourses[booking.courseId]?.name || '';
+                
+                csvContent += `${index + 1},"${booking.studentName}","${booking.studentClass}",${booking.seatNumber},"${booking.courseId}","${courseName}","${formattedTime}"\n`;
+            });
+            
+            // Create and download file
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            const fileName = courseFilter ? 
+                `bookings_${courseFilter}_${new Date().toISOString().split('T')[0]}.csv` :
+                `bookings_all_${new Date().toISOString().split('T')[0]}.csv`;
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', fileName);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showMessage("สำเร็จ", `ดาวน์โหลดข้อมูล ${exportBookings.length} รายการสำเร็จแล้ว`);
+        }
+
+        // Statistics
+        function updateStats() {
+            const totalCourses = Object.keys(allCourses).length;
+            const totalBookings = Object.keys(allBookings).length;
+            
+            let todayBookings = 0;
+            const today = new Date().toISOString().split('T')[0];
+            
+            Object.values(allBookings).forEach(booking => {
+                if (booking.bookingDate === today) {
+                    todayBookings++;
+                }
+            });
+            
+            // Calculate changes
+            const courseChange = totalCourses - lastStats.totalCourses;
+            const bookingChange = totalBookings - lastStats.totalBookings;
+            const todayChange = todayBookings - lastStats.todayBookings;
+            
+            // Update last stats
+            lastStats = { totalCourses, totalBookings, todayBookings };
+            
+            statsContainer.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${totalCourses}</div>
+                    <div class="stat-label">วิชาทั้งหมด</div>
+                    ${courseChange !== 0 ? `
+                        <div class="stat-change ${courseChange > 0 ? 'positive' : 'negative'}">
+                            ${courseChange > 0 ? '+' : ''}${courseChange}
+                        </div>
+                    ` : ''}
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${totalBookings}</div>
+                    <div class="stat-label">การจองทั้งหมด</div>
+                    ${bookingChange !== 0 ? `
+                        <div class="stat-change ${bookingChange > 0 ? 'positive' : 'negative'}">
+                            ${bookingChange > 0 ? '+' : ''}${bookingChange}
+                        </div>
+                    ` : ''}
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${todayBookings}</div>
+                    <div class="stat-label">จองวันนี้</div>
+                    ${todayChange !== 0 ? `
+                        <div class="stat-change ${todayChange > 0 ? 'positive' : 'negative'}">
+                            ${todayChange > 0 ? '+' : ''}${todayChange}
+                        </div>
+                    ` : ''}
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${Math.round((totalBookings / (totalCourses * 30 || 1)) * 100)}%</div>
+                    <div class="stat-label">อัตราการจอง</div>
+                </div>
+            `;
+        }
+
+        function updateCourseFilter() {
+            filterCourseSelect.innerHTML = '<option value="">ทั้งหมด</option>';
+            
+            for (const courseId in allCourses) {
+                const course = allCourses[courseId];
+                const option = document.createElement('option');
+                option.value = courseId;
+                option.textContent = `${courseId} - ${course.name}`;
+                filterCourseSelect.appendChild(option);
+            }
+        }
+
+        function refreshAllData() {
+            showMessage("กำลังอัพเดต", "กำลังโหลดข้อมูลใหม่...");
+            loadCourses();
+            loadBookings();
+        }
+
+        function refreshBookings() {
+            showMessage("กำลังอัพเดต", "กำลังโหลดข้อมูลการจองใหม่...");
+            loadBookings();
+        }
+
+        function updateLastUpdateTime() {
+            const now = new Date();
+            lastUpdateElement.textContent = now.toLocaleTimeString('th-TH');
+        }
+
         function clearCourseForm() {
             courseIdInput.value = '';
             courseNameInput.value = '';
             courseSeatsInput.value = '';
             courseInstructorInput.value = '';
             courseTimeInput.value = '';
+            courseDescriptionInput.value = '';
         }
 
         // Show Confirm Modal
         function showConfirmModal(title, message, onConfirm) {
             confirmTitle.textContent = title;
-            confirmMessage.textContent = message;
+            confirmMessage.innerHTML = message;
             confirmModal.classList.add('active');
             
-            btnConfirm.onclick = () => {
+            btnConfirmDelete.onclick = () => {
                 onConfirm();
                 confirmModal.classList.remove('active');
             };
         }
 
-        // Execute Confirm Action
-        function executeConfirmAction() {
-            confirmModal.classList.remove('active');
+        // Confirm Delete Action
+        function confirmDeleteAction() {
+            if (selectedBookingId) {
+                deleteBooking(selectedBookingId);
+                confirmModal.classList.remove('active');
+            }
         }
 
-        // Global Functions for onclick
-        window.editCourse = function(courseId) {
-            const course = allCourses[courseId];
+        // Show Message
+        function showMessage(title, text) {
+            messageTitle.textContent = title;
+            messageText.innerHTML = text;
+            messageModal.classList.add('active');
+        }
+
+        // Global Functions for onclick attributes
+        window.editCourse = function(courseCode) {
+            const course = allCourses[courseCode];
             if (!course) return;
             
-            courseIdInput.value = courseId;
+            courseIdInput.value = courseCode;
             courseNameInput.value = course.name || '';
             courseSeatsInput.value = course.totalSeats || '';
             courseInstructorInput.value = course.instructor || '';
             courseTimeInput.value = course.time || '';
+            courseDescriptionInput.value = course.description || '';
         };
 
-        window.showDeleteCourseConfirm = function(courseId) {
-            const course = allCourses[courseId];
+        window.showDeleteCourseModal = function(courseCode) {
+            const course = allCourses[courseCode];
             if (!course) return;
             
             showConfirmModal(
                 "ยืนยันการลบวิชา",
-                `ลบวิชา ${courseId} - ${course.name}? การลบวิชาจะลบข้อมูลการจองทั้งหมดในวิชานี้ด้วย`,
+                `คุณแน่ใจหรือไม่ว่าต้องการลบวิชา ${courseCode} - ${course.name}?<br><br>
+                 <strong style='color: var(--danger);'>คำเตือน:</strong> การลบวิชาจะลบข้อมูลการจองทั้งหมดในวิชานี้ด้วย!`,
                 async () => {
                     try {
-                        // Delete bookings first
+                        // Delete all bookings for this course
                         const bookingsSnapshot = await db.collection("bookings")
-                            .where("courseId", "==", courseId)
+                            .where("courseId", "==", courseCode)
                             .get();
                         
                         const batch = db.batch();
@@ -1045,41 +1564,64 @@
                             batch.delete(doc.ref);
                         });
                         
-                        // Delete course
-                        batch.delete(db.collection("courses").doc(courseId));
+                        // Delete the course
+                        batch.delete(db.collection("courses").doc(courseCode));
                         
                         await batch.commit();
                         
-                        alert(`ลบวิชา ${courseId} สำเร็จ`);
-                        loadData();
+                        showMessage("สำเร็จ", `ลบวิชา ${courseCode} สำเร็จแล้ว`);
                         
                     } catch (error) {
                         console.error("Error deleting course:", error);
-                        alert("ไม่สามารถลบวิชาได้");
+                        showMessage("ข้อผิดพลาด", "ไม่สามารถลบวิชาได้");
                     }
                 }
             );
+        };
+
+        window.viewCourseBookings = function(courseCode) {
+            filterCourseSelect.value = courseCode;
+            filterBookings();
         };
 
         window.showDeleteBookingConfirm = function(bookingId) {
             const booking = allBookings[bookingId];
             if (!booking) return;
             
+            selectedBookingId = bookingId;
+            
             showConfirmModal(
                 "ยืนยันการลบการจอง",
-                `ลบการจองของ ${booking.studentName} (วิชา ${booking.courseId} ที่นั่ง ${booking.seatNumber})?`,
+                `คุณแน่ใจหรือไม่ว่าต้องการลบการจองของ:<br><br>
+                 <strong>${booking.studentName}</strong><br>
+                 วิชา: ${booking.courseId}<br>
+                 ที่นั่ง: ${booking.seatNumber}<br>
+                 ห้องเรียน: ${booking.studentClass}`,
                 async () => {
                     try {
                         await db.collection("bookings").doc(bookingId).delete();
-                        alert("ลบการจองสำเร็จ");
-                        loadData();
+                        showMessage("สำเร็จ", "ลบข้อมูลการจองสำเร็จแล้ว");
+                        selectedBookingId = null;
                     } catch (error) {
                         console.error("Error deleting booking:", error);
-                        alert("ไม่สามารถลบการจองได้");
+                        showMessage("ข้อผิดพลาด", "ไม่สามารถลบข้อมูลการจองได้");
+                        selectedBookingId = null;
                     }
                 }
             );
         };
+
+        async function deleteBooking(bookingId) {
+            try {
+                await db.collection("bookings").doc(bookingId).delete();
+                showMessage("สำเร็จ", "ลบข้อมูลการจองสำเร็จแล้ว");
+                selectedBookingId = null;
+            } catch (error) {
+                console.error("Error deleting booking:", error);
+                showMessage("ข้อผิดพลาด", "ไม่สามารถลบข้อมูลการจองได้");
+                selectedBookingId = null;
+            }
+        }
     </script>
 </body>
 </html>
