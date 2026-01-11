@@ -822,15 +822,15 @@
                         </div>
                         <div class="legend-item">
                             <div class="legend-color seat-selected"></div>
-                            <span>กำลังเลือก (สีเขียว)</span>
+                            <span>กำลังเลือก (คลิกซ้ำเพื่อยกเลิก)</span>
                         </div>
                         <div class="legend-item">
                             <div class="legend-color seat-reserving"></div>
-                            <span>กำลังถูกเลือกโดยผู้อื่น (สีส้ม)</span>
+                            <span>กำลังถูกเลือกโดยผู้อื่น</span>
                         </div>
                         <div class="legend-item">
                             <div class="legend-color seat-booked"></div>
-                            <span>จองแล้ว (สีดำ)</span>
+                            <span>จองแล้ว</span>
                         </div>
                     </div>
                     
@@ -902,13 +902,14 @@
                     </h3>
                     <ol style="margin-left: 20px; line-height: 1.8;">
                         <li>เลือกวิชาจากหน้าหลัก</li>
-                        <li>เลือกที่นั่งที่ว่าง (สีฟ้า)</li>
+                        <li>เลือกที่นั่งที่ว่าง (สีฟ้า) - คลิกเพื่อเลือก</li>
+                        <li>ยกเลิกการเลือก - คลิกซ้ำที่นั่งสีเขียว</li>
                         <li>กรอกชื่อ-นามสกุลและห้องเรียน</li>
                         <li>คลิกยืนยันการจองภายใน 30 วินาที</li>
                         <li>บันทึกข้อมูลการจองที่ได้รับ</li>
                     </ol>
                     <p style="margin-top: 10px; color: var(--success);">
-                        <i class="fas fa-lightbulb"></i> ที่นั่งสีเขียว = กำลังเลือกอยู่
+                        <i class="fas fa-lightbulb"></i> ที่นั่งสีเขียว = กำลังเลือกอยู่ (คลิกซ้ำเพื่อยกเลิก)
                     </p>
                     <p style="margin-top: 5px; color: var(--reserving);">
                         <i class="fas fa-lightbulb"></i> ที่นั่งสีส้ม = มีคนอื่นกำลังเลือกอยู่
@@ -944,11 +945,11 @@
                 </h3>
                 <ul style="margin-left: 20px; line-height: 1.8;">
                     <li>ข้อมูลอัพเดตแบบเรียลไทม์ ไม่ต้องรีเฟรชหน้า</li>
-                    <li>สามารถจองหลายที่นั่งพร้อมกันได้</li>
+                    <li>สามารถเลือกหลายที่นั่งพร้อมกันได้</li>
+                    <li><strong>คลิกซ้ำที่นั่งสีเขียวเพื่อยกเลิกการเลือก</strong></li>
                     <li>ถ้าไม่เห็นวิชาแสดงขึ้นมา ให้รอสักครู่</li>
                     <li>มีปัญหาการใช้งานให้แจ้งผู้ดูแลระบบ</li>
-                    <li>ที่นั่งสีส้มหมายถึงมีคนอื่นกำลังเลือกอยู่ (รีเฟรชสีอัตโนมัติ)</li>
-                    <li>ที่นั่งสีเขียวหมายถึงคุณกำลังเลือกอยู่</li>
+                    <li>ที่นั่งสีส้มหมายถึงมีคนอื่นกำลังเลือกอยู่</li>
                     <li>ที่นั่งสีดำหมายถึงจองแล้วโดยผู้อื่น</li>
                     <li>ระบบจะแจ้งเตือนเมื่อมีคนกำลังเลือกที่นั่ง</li>
                 </ul>
@@ -994,7 +995,7 @@
     </div>
 
     <script>
-        // Firebase Configuration - FIXED VERSION
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAIawhBmDnJs2rfAoThFFG-8llvIk1--aU",
             authDomain: "exam-test-ac-me.firebaseapp.com",
@@ -1646,14 +1647,15 @@
                     const reservation = reservedSeats[i];
                     if (reservation.userId === currentUserId) {
                         seat.classList.add('seat-selected');
-                        seat.title = 'กำลังเลือก (สีเขียว) - คุณกำลังเลือกที่นั่งนี้';
+                        seat.title = 'กำลังเลือก (สีเขียว) - คลิกซ้ำเพื่อยกเลิกการเลือก';
+                        seat.addEventListener('click', () => selectSeat(i));
                     } else {
                         seat.classList.add('seat-reserving');
                         seat.title = `กำลังถูกเลือกโดยผู้อื่น (เหลือเวลา ${reservation.timeLeft} วินาที)`;
                     }
                 } else {
                     seat.classList.add('seat-available');
-                    seat.title = 'ที่นั่งว่าง';
+                    seat.title = 'ที่นั่งว่าง - คลิกเพื่อเลือก';
                     seat.addEventListener('click', () => selectSeat(i));
                 }
                 
@@ -1671,7 +1673,7 @@
             return userId;
         }
 
-        // Select Seat
+        // Select Seat - MODIFIED VERSION: Click to select, click again to deselect
         async function selectSeat(seatNumber) {
             if (!isConnected) {
                 showError('การเชื่อมต่อ', 'ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้');
@@ -1680,6 +1682,32 @@
             
             const currentUserId = getUserId();
             const now = new Date();
+            
+            // Check if seat is already selected by current user
+            const isAlreadySelected = selectedSeats.includes(seatNumber);
+            
+            // If already selected, deselect it
+            if (isAlreadySelected) {
+                // Remove from selected seats
+                selectedSeats = selectedSeats.filter(num => num !== seatNumber);
+                
+                // Delete seat reservation
+                await deleteSeatReservation(seatNumber);
+                
+                // Update display
+                updateSelectedSeatsDisplay();
+                
+                // Clear reservation if no seats selected
+                if (selectedSeats.length === 0) {
+                    clearReservation();
+                } else {
+                    // Update timer if seats still selected
+                    startReservationTimer();
+                }
+                
+                renderSeats();
+                return;
+            }
             
             // Check if seat is being reserved by someone else
             for (const reservationId in seatReservations) {
@@ -1702,25 +1730,27 @@
                 }
             }
             
-            if (!selectedSeats.includes(seatNumber)) {
-                selectedSeats.push(seatNumber);
-                
-                await createSeatReservation(seatNumber);
-                
-                updateSelectedSeatsDisplay();
-                startReservationTimer();
-                
-            } else {
-                selectedSeats = selectedSeats.filter(num => num !== seatNumber);
-                
-                await deleteSeatReservation(seatNumber);
-                
-                updateSelectedSeatsDisplay();
-                
-                if (selectedSeats.length === 0) {
-                    clearReservation();
+            // Check if seat is already booked
+            for (const bookingId in bookings) {
+                const booking = bookings[bookingId];
+                if (booking.courseId === selectedCourse && 
+                    booking.seatNumber === seatNumber) {
+                    showMessage('ไม่สามารถเลือกที่นั่งนี้ได้', 
+                        `ที่นั่ง ${seatNumber} ถูกจองไปแล้ว`
+                    );
+                    return;
                 }
             }
+            
+            // Add to selected seats
+            selectedSeats.push(seatNumber);
+            
+            // Create seat reservation
+            await createSeatReservation(seatNumber);
+            
+            // Update display and start timer
+            updateSelectedSeatsDisplay();
+            startReservationTimer();
             
             renderSeats();
         }
