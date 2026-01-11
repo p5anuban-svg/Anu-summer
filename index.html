@@ -22,6 +22,16 @@
             --gray: #5f6368;
             --light-gray: #f5f7fa;
             --error: #ea4335;
+            --art: #9c27b0;
+            --ball: #4caf50;
+            --cn: #f44336;
+            --com: #2196f3;
+            --dance: #ff9800;
+            --food: #795548;
+            --music: #3f51b5;
+            --music-th: #009688;
+            --swim: #00bcd4;
+            --craft: #607d8b;
         }
         
         * {
@@ -120,6 +130,109 @@
 
         .tab-content.active {
             display: block;
+        }
+
+        /* ปุ่มหมวดหมู่ */
+        .category-container {
+            margin: 20px 0;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+
+        .category-buttons {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 10px;
+            padding: 10px 0;
+        }
+
+        .category-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 80px;
+            padding: 12px 8px;
+            border: none;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .category-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .category-btn.active {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .category-icon {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .category-text {
+            font-size: 0.85rem;
+        }
+
+        /* สีสำหรับแต่ละหมวดหมู่ */
+        .category-art { background-color: rgba(156, 39, 176, 0.1); border-left: 4px solid var(--art); color: var(--art); }
+        .category-art.active { background-color: rgba(156, 39, 176, 0.2); }
+        .category-ball { background-color: rgba(76, 175, 80, 0.1); border-left: 4px solid var(--ball); color: var(--ball); }
+        .category-ball.active { background-color: rgba(76, 175, 80, 0.2); }
+        .category-cn { background-color: rgba(244, 67, 54, 0.1); border-left: 4px solid var(--cn); color: var(--cn); }
+        .category-cn.active { background-color: rgba(244, 67, 54, 0.2); }
+        .category-com { background-color: rgba(33, 150, 243, 0.1); border-left: 4px solid var(--com); color: var(--com); }
+        .category-com.active { background-color: rgba(33, 150, 243, 0.2); }
+        .category-dance { background-color: rgba(255, 152, 0, 0.1); border-left: 4px solid var(--dance); color: var(--dance); }
+        .category-dance.active { background-color: rgba(255, 152, 0, 0.2); }
+        .category-food { background-color: rgba(121, 85, 72, 0.1); border-left: 4px solid var(--food); color: var(--food); }
+        .category-food.active { background-color: rgba(121, 85, 72, 0.2); }
+        .category-music { background-color: rgba(63, 81, 181, 0.1); border-left: 4px solid var(--music); color: var(--music); }
+        .category-music.active { background-color: rgba(63, 81, 181, 0.2); }
+        .category-music-th { background-color: rgba(0, 150, 136, 0.1); border-left: 4px solid var(--music-th); color: var(--music-th); }
+        .category-music-th.active { background-color: rgba(0, 150, 136, 0.2); }
+        .category-swim { background-color: rgba(0, 188, 212, 0.1); border-left: 4px solid var(--swim); color: var(--swim); }
+        .category-swim.active { background-color: rgba(0, 188, 212, 0.2); }
+        .category-craft { background-color: rgba(96, 125, 139, 0.1); border-left: 4px solid var(--craft); color: var(--craft); }
+        .category-craft.active { background-color: rgba(96, 125, 139, 0.2); }
+        .category-all { background-color: rgba(26, 115, 232, 0.1); border-left: 4px solid var(--primary); color: var(--primary); }
+        .category-all.active { background-color: rgba(26, 115, 232, 0.2); }
+
+        /* กล่องแสดงรายการวิชา */
+        .category-info {
+            background: linear-gradient(135deg, #f8f9fa, #e8f0fe);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .category-info h3 {
+            color: var(--primary);
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .course-count {
+            background: var(--primary);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
         }
 
         .courses-grid {
@@ -740,6 +853,24 @@
                 padding: 3px 6px;
                 font-size: 0.9rem;
             }
+            
+            .category-buttons {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+            }
+            
+            .category-btn {
+                min-width: 70px;
+                padding: 10px 6px;
+            }
+            
+            .category-icon {
+                font-size: 1.2rem;
+            }
+            
+            .category-text {
+                font-size: 0.75rem;
+            }
         }
 
         @media (max-width: 480px) {
@@ -756,6 +887,15 @@
             
             .courses-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .category-buttons {
+                gap: 5px;
+            }
+            
+            .category-btn {
+                min-width: 60px;
+                padding: 8px 4px;
             }
         }
     </style>
@@ -779,13 +919,27 @@
         <!-- หน้าหลัก -->
         <div id="home" class="tab-content active">
             <h2><i class="fas fa-book-open"></i> เลือกรายวิชา</h2>
-            <p>เลือกวิชาที่ต้องการจองที่นั่งเรียน ข้อมูลจะอัพเดตแบบเรียลไทม์</p>
+            <p>เลือกหมวดหมู่วิชาที่ต้องการจองที่นั่งเรียน ข้อมูลจะอัพเดตแบบเรียลไทม์</p>
             
             <div class="connection-status connecting" id="connection-status">
                 <i class="fas fa-circle"></i>
                 <span>กำลังเชื่อมต่อกับฐานข้อมูล...</span>
             </div>
             
+            <!-- แถวปุ่มหมวดหมู่ -->
+            <div class="category-container">
+                <div class="category-buttons" id="category-buttons">
+                    <!-- ปุ่มหมวดหมู่จะถูกสร้างโดย JavaScript -->
+                </div>
+            </div>
+            
+            <!-- ข้อมูลหมวดหมู่ที่เลือก -->
+            <div class="category-info" id="category-info" style="display: none;">
+                <h3 id="current-category-name">หมวดหมู่ทั้งหมด</h3>
+                <div class="course-count" id="course-count">0 วิชา</div>
+            </div>
+            
+            <!-- รายการวิชา -->
             <div id="courses-list" class="courses-grid">
                 <!-- วิชาจะแสดงที่นี่ -->
             </div>
@@ -901,7 +1055,8 @@
                         <i class="fas fa-user-graduate"></i> สำหรับนักเรียน
                     </h3>
                     <ol style="margin-left: 20px; line-height: 1.8;">
-                        <li>เลือกวิชาจากหน้าหลัก</li>
+                        <li>เลือกหมวดหมู่วิชาจากปุ่มด้านบน</li>
+                        <li>เลือกวิชาจากรายการที่แสดง</li>
                         <li>เลือกที่นั่งที่ว่าง (สีฟ้า) - คลิกเพื่อเลือก</li>
                         <li>ยกเลิกการเลือก - คลิกซ้ำที่นั่งสีเขียว</li>
                         <li>กรอกชื่อ-นามสกุลและห้องเรียน</li>
@@ -1031,8 +1186,24 @@
         let reservationTimer = null;
         let seatReservationsListener = null;
         let activeUsers = 0;
+        let currentCategory = 'all'; // หมวดหมู่ที่เลือกปัจจุบัน
         const RESERVATION_TIMEOUT_SECONDS = 30;
         const CLEANUP_INTERVAL = 5000; // 5 seconds
+        
+        // กำหนดหมวดหมู่วิชา
+        const categories = [
+            { id: 'all', name: 'ทั้งหมด', icon: 'fas fa-list', colorClass: 'category-all' },
+            { id: 'ART', name: 'ศิลปะ', icon: 'fas fa-palette', colorClass: 'category-art' },
+            { id: 'BALL', name: 'ฟุตซอล', icon: 'fas fa-futbol', colorClass: 'category-ball' },
+            { id: 'CN', name: 'ภาษาจีน', icon: 'fas fa-language', colorClass: 'category-cn' },
+            { id: 'COM', name: 'คอมพิวเตอร์', icon: 'fas fa-laptop-code', colorClass: 'category-com' },
+            { id: 'D', name: 'นาฏศิลป์', icon: 'fas fa-theater-masks', colorClass: 'category-dance' },
+            { id: 'FOOD', name: 'คหกรรม', icon: 'fas fa-utensils', colorClass: 'category-food' },
+            { id: 'MUSIC', name: 'ดนตรีสากล', icon: 'fas fa-music', colorClass: 'category-music' },
+            { id: 'MUSIC-T', name: 'ดนตรีไทย', icon: 'fas fa-guitar', colorClass: 'category-music-th' },
+            { id: 'SWIM', name: 'ว่ายน้ำ', icon: 'fas fa-swimmer', colorClass: 'category-swim' },
+            { id: 'W', name: 'งานประดิษฐ์', icon: 'fas fa-tools', colorClass: 'category-craft' }
+        ];
 
         // DOM Elements
         const tabButtons = document.querySelectorAll('.tab-button');
@@ -1073,6 +1244,10 @@
         const errorDetails = document.getElementById('error-details');
         const btnDebug = document.getElementById('btn-debug');
         const btnSetupDb = document.getElementById('btn-setup-db');
+        const categoryButtonsContainer = document.getElementById('category-buttons');
+        const categoryInfo = document.getElementById('category-info');
+        const currentCategoryName = document.getElementById('current-category-name');
+        const courseCountElement = document.getElementById('course-count');
 
         // Event Listeners
         document.addEventListener('DOMContentLoaded', initializeApp);
@@ -1110,6 +1285,9 @@
                 updateConnectionStatus('เชื่อมต่อกับฐานข้อมูลสำเร็จ', 'connected');
                 isConnected = true;
                 
+                // สร้างปุ่มหมวดหมู่
+                createCategoryButtons();
+                
                 // Setup real-time listeners
                 setupRealtimeListeners();
                 
@@ -1143,6 +1321,78 @@
             }
         }
 
+        // สร้างปุ่มหมวดหมู่
+        function createCategoryButtons() {
+            if (!categoryButtonsContainer) return;
+            
+            categories.forEach(category => {
+                const button = document.createElement('button');
+                button.className = `category-btn ${category.colorClass}`;
+                button.setAttribute('data-category', category.id);
+                
+                if (category.id === currentCategory) {
+                    button.classList.add('active');
+                }
+                
+                button.innerHTML = `
+                    <div class="category-icon">
+                        <i class="${category.icon}"></i>
+                    </div>
+                    <div class="category-text">${category.name}</div>
+                `;
+                
+                button.addEventListener('click', () => {
+                    selectCategory(category.id);
+                });
+                
+                categoryButtonsContainer.appendChild(button);
+            });
+        }
+
+        // เลือกหมวดหมู่
+        function selectCategory(categoryId) {
+            currentCategory = categoryId;
+            
+            // อัพเดตสถานะปุ่มหมวดหมู่
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-category') === categoryId) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // อัพเดตข้อมูลหมวดหมู่
+            updateCategoryInfo();
+            
+            // แสดงวิชาในหมวดหมู่
+            renderCourses();
+        }
+
+        // อัพเดตข้อมูลหมวดหมู่
+        function updateCategoryInfo() {
+            if (!categoryInfo || !currentCategoryName || !courseCountElement) return;
+            
+            const category = categories.find(c => c.id === currentCategory);
+            if (!category) return;
+            
+            currentCategoryName.textContent = `หมวดหมู่: ${category.name}`;
+            
+            // นับจำนวนวิชาในหมวดหมู่
+            let courseCount = 0;
+            if (currentCategory === 'all') {
+                courseCount = Object.keys(courses).length;
+            } else {
+                courseCount = Object.keys(courses).filter(courseId => {
+                    return courseId.startsWith(currentCategory);
+                }).length;
+            }
+            
+            courseCountElement.textContent = `${courseCount} วิชา`;
+            
+            // แสดงข้อมูลหมวดหมู่
+            categoryInfo.style.display = 'flex';
+        }
+
         // Check Database Setup
         async function checkDatabaseSetup() {
             try {
@@ -1174,35 +1424,48 @@
                     action: 'database_setup'
                 });
                 
-                // สร้างข้อมูลตัวอย่าง
+                // สร้างข้อมูลตัวอย่างตามหมวดหมู่ที่กำหนด
                 const sampleCourses = [
-                    {
-                        id: 'CS101',
-                        name: 'การเขียนโปรแกรมคอมพิวเตอร์',
-                        totalSeats: 30,
-                        instructor: 'อาจารย์สมชาย ใจดี',
-                        time: 'จันทร์ 09:00-12:00',
-                        description: 'วิชาพื้นฐานการเขียนโปรแกรมด้วยภาษา Python',
-                        createdAt: new Date().toISOString()
-                    },
-                    {
-                        id: 'MATH201',
-                        name: 'คณิตศาสตร์ดิสครีต',
-                        totalSeats: 25,
-                        instructor: 'อาจารย์สมหญิง เก่งกล้า',
-                        time: 'อังคาร 13:00-16:00',
-                        description: 'วิชาคณิตศาสตร์สำหรับนักคอมพิวเตอร์',
-                        createdAt: new Date().toISOString()
-                    },
-                    {
-                        id: 'ENG102',
-                        name: 'ภาษาอังกฤษเพื่อการสื่อสาร',
-                        totalSeats: 40,
-                        instructor: 'อาจารย์ John Smith',
-                        time: 'พุธ 10:00-13:00',
-                        description: 'พัฒนาทักษะภาษาอังกฤษเพื่อการสื่อสาร',
-                        createdAt: new Date().toISOString()
-                    }
+                    // ศิลปะ
+                    { id: 'ART101', name: 'ศิลปะ ป.1', totalSeats: 25, instructor: 'ครูศิลป์ ศิลปกรรม', time: 'จันทร์ 09:00-10:00', description: 'ศิลปะพื้นฐานสำหรับนักเรียนชั้นประถม 1' },
+                    { id: 'ART201', name: 'ศิลปะ ป.2', totalSeats: 25, instructor: 'ครูศิลป์ ศิลปกรรม', time: 'จันทร์ 10:00-11:00', description: 'ศิลปะพื้นฐานสำหรับนักเรียนชั้นประถม 2' },
+                    { id: 'ART301', name: 'ศิลปะ ป.3', totalSeats: 25, instructor: 'ครูศิลป์ ศิลปกรรม', time: 'จันทร์ 11:00-12:00', description: 'ศิลปะพื้นฐานสำหรับนักเรียนชั้นประถม 3' },
+                    
+                    // ฟุตซอล
+                    { id: 'BALL101', name: 'ฟุตซอล ป.1-3', totalSeats: 20, instructor: 'ครูเอก ฟุตซอล', time: 'อังคาร 09:00-10:00', description: 'ฝึกทักษะฟุตซอลพื้นฐาน' },
+                    { id: 'BALL201', name: 'ฟุตซอล ป.4-6', totalSeats: 20, instructor: 'ครูเอก ฟุตซอล', time: 'อังคาร 10:00-11:00', description: 'ฝึกทักษะฟุตซอลระดับกลาง' },
+                    
+                    // ภาษาจีน
+                    { id: 'CN101', name: 'ภาษาจีนพื้นฐาน', totalSeats: 30, instructor: 'ครูหลิน จีน', time: 'พุธ 09:00-10:00', description: 'เรียนภาษาจีนพื้นฐาน พินอิน คำศัพท์ง่ายๆ' },
+                    { id: 'CN201', name: 'ภาษาจีนกลาง', totalSeats: 30, instructor: 'ครูหลิน จีน', time: 'พุธ 10:00-11:00', description: 'ภาษาจีนสำหรับการสนทนาในชีวิตประจำวัน' },
+                    
+                    // คอมพิวเตอร์
+                    { id: 'COM101', name: 'คอมพิวเตอร์เบื้องต้น', totalSeats: 30, instructor: 'ครูสมชาย คอมพิวเตอร์', time: 'พฤหัส 09:00-10:00', description: 'พื้นฐานการใช้คอมพิวเตอร์และอินเทอร์เน็ต' },
+                    { id: 'COM201', name: 'โปรแกรมมิ่งพื้นฐาน', totalSeats: 25, instructor: 'ครูสมชาย คอมพิวเตอร์', time: 'พฤหัส 10:00-11:00', description: 'เรียนรู้การเขียนโปรแกรมเบื้องต้น' },
+                    
+                    // นาฏศิลป์
+                    { id: 'D101', name: 'นาฏศิลป์ไทย', totalSeats: 20, instructor: 'ครูรำ นาฏศิลป์', time: 'ศุกร์ 09:00-10:00', description: 'เรียนรำไทยพื้นฐาน ท่ารำไทย' },
+                    { id: 'D201', name: 'นาฏศิลป์ร่วมสมัย', totalSeats: 20, instructor: 'ครูรำ นาฏศิลป์', time: 'ศุกร์ 10:00-11:00', description: 'การเต้นร่วมสมัยและการแสดง' },
+                    
+                    // คหกรรม
+                    { id: 'FOOD101', name: 'คหกรรมพื้นฐาน', totalSeats: 25, instructor: 'ครูปรุง อาหาร', time: 'จันทร์ 13:00-14:00', description: 'พื้นฐานการทำอาหารและงานบ้าน' },
+                    { id: 'FOOD201', name: 'อาหารไทย', totalSeats: 25, instructor: 'ครูปรุง อาหาร', time: 'จันทร์ 14:00-15:00', description: 'เรียนทำอาหารไทยเมนูต่างๆ' },
+                    
+                    // ดนตรีสากล
+                    { id: 'MUSIC101', name: 'ดนตรีสากลเบื้องต้น', totalSeats: 20, instructor: 'ครูดนตรี สากล', time: 'อังคาร 13:00-14:00', description: 'พื้นฐานดนตรีสากลและเครื่องดนตรี' },
+                    { id: 'MUSIC201', name: 'เปียโนพื้นฐาน', totalSeats: 15, instructor: 'ครูดนตรี สากล', time: 'อังคาร 14:00-15:00', description: 'เรียนเปียโนสำหรับผู้เริ่มต้น' },
+                    
+                    // ดนตรีไทย
+                    { id: 'MUSIC-T101', name: 'ดนตรีไทยเบื้องต้น', totalSeats: 20, instructor: 'ครูไทย ดนตรีไทย', time: 'พุธ 13:00-14:00', description: 'พื้นฐานดนตรีไทยและเครื่องดนตรีไทย' },
+                    { id: 'MUSIC-T201', name: 'ขิมพื้นฐาน', totalSeats: 15, instructor: 'ครูไทย ดนตรีไทย', time: 'พุธ 14:00-15:00', description: 'เรียนขิมสำหรับผู้เริ่มต้น' },
+                    
+                    // ว่ายน้ำ
+                    { id: 'SWIM101', name: 'ว่ายน้ำเบื้องต้น', totalSeats: 15, instructor: 'ครูว่าย น้ำ', time: 'พฤหัส 13:00-14:00', description: 'ว่ายน้ำสำหรับผู้เริ่มต้น ปลอดภัยกับน้ำ' },
+                    { id: 'SWIM201', name: 'ว่ายน้ำท่ามาตรฐาน', totalSeats: 15, instructor: 'ครูว่าย น้ำ', time: 'พฤหัส 14:00-15:00', description: 'ว่ายน้ำท่ามาตรฐานและการช่วยเหลือ' },
+                    
+                    // งานประดิษฐ์
+                    { id: 'W101', name: 'งานประดิษฐ์เบื้องต้น', totalSeats: 25, instructor: 'ครูประดิษฐ์ งานฝีมือ', time: 'ศุกร์ 13:00-14:00', description: 'พื้นฐานงานประดิษฐ์และงานฝีมือ' },
+                    { id: 'W201', name: 'ประดิษฐ์ของเล่น', totalSeats: 25, instructor: 'ครูประดิษฐ์ งานฝีมือ', time: 'ศุกร์ 14:00-15:00', description: 'การประดิษฐ์ของเล่นจากวัสดุเหลือใช้' }
                 ];
                 
                 // สร้าง collection หลัก
@@ -1223,17 +1486,24 @@
                         instructor: course.instructor,
                         time: course.time,
                         description: course.description,
-                        createdAt: course.createdAt
+                        createdAt: new Date().toISOString()
                     });
                 }
                 
                 loadingModal.classList.remove('active');
                 showMessage('สำเร็จ', 
                     'ตั้งค่าฐานข้อมูลสำเร็จ!\n\n' +
-                    'สร้างข้อมูลตัวอย่าง:\n' +
-                    '- วิชา CS101: การเขียนโปรแกรมคอมพิวเตอร์\n' +
-                    '- วิชา MATH201: คณิตศาสตร์ดิสครีต\n' +
-                    '- วิชา ENG102: ภาษาอังกฤษเพื่อการสื่อสาร\n\n' +
+                    'สร้างข้อมูลตัวอย่างครบทุกหมวดหมู่:\n' +
+                    '- ศิลปะ (ART) 3 วิชา\n' +
+                    '- ฟุตซอล (BALL) 2 วิชา\n' +
+                    '- ภาษาจีน (CN) 2 วิชา\n' +
+                    '- คอมพิวเตอร์ (COM) 2 วิชา\n' +
+                    '- นาฏศิลป์ (D) 2 วิชา\n' +
+                    '- คหกรรม (FOOD) 2 วิชา\n' +
+                    '- ดนตรีสากล (MUSIC) 2 วิชา\n' +
+                    '- ดนตรีไทย (MUSIC-T) 2 วิชา\n' +
+                    '- ว่ายน้ำ (SWIM) 2 วิชา\n' +
+                    '- งานประดิษฐ์ (W) 2 วิชา\n\n' +
                     'ระบบพร้อมใช้งานแล้ว'
                 );
                 
@@ -1265,6 +1535,7 @@
                     courses[doc.id] = { id: doc.id, ...doc.data() };
                 });
                 renderCourses();
+                updateCategoryInfo();
                 updateLastUpdateTime();
             }, error => {
                 console.error('Courses listener error:', error);
@@ -1445,6 +1716,7 @@
                     courses[doc.id] = { id: doc.id, ...doc.data() };
                 });
                 renderCourses();
+                updateCategoryInfo();
             } catch (error) {
                 console.error('Error loading courses:', error);
                 showError('Load Courses Error', error.message);
@@ -1467,7 +1739,7 @@
             }
         }
 
-        // Render Courses
+        // Render Courses - แก้ไขให้แสดงเฉพาะหมวดหมู่ที่เลือก
         function renderCourses() {
             if (!coursesList) return;
             
@@ -1489,7 +1761,33 @@
                 return;
             }
             
-            for (const courseId in courses) {
+            // กรองวิชาตามหมวดหมู่
+            let filteredCourses = [];
+            if (currentCategory === 'all') {
+                filteredCourses = Object.keys(courses);
+            } else {
+                filteredCourses = Object.keys(courses).filter(courseId => {
+                    return courseId.startsWith(currentCategory);
+                });
+            }
+            
+            if (filteredCourses.length === 0) {
+                const category = categories.find(c => c.id === currentCategory);
+                coursesList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-book"></i>
+                        <h3>ไม่พบวิชาในหมวดหมู่ "${category ? category.name : currentCategory}"</h3>
+                        <p>กรุณาเลือกหมวดหมู่อื่นหรือเพิ่มวิชาในหมวดหมู่นี้ในหน้า "ผู้ดูแลระบบ"</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // เรียงลำดับวิชา
+            filteredCourses.sort();
+            
+            // แสดงวิชาทีละวิชา
+            for (const courseId of filteredCourses) {
                 const course = courses[courseId];
                 
                 let bookedCount = 0;
@@ -1539,6 +1837,7 @@
                 coursesList.appendChild(courseCard);
             }
             
+            // เพิ่ม event listener ให้กับปุ่มเลือกวิชา
             document.querySelectorAll('.select-course').forEach(button => {
                 button.addEventListener('click', function() {
                     selectCourse(this.getAttribute('data-course-id'));
@@ -2045,6 +2344,7 @@
                 - Selected Seats: ${selectedSeats.join(', ') || 'None'}
                 - User ID: ${getUserId()}
                 - Active Users: ${activeUsers}
+                - Current Category: ${currentCategory}
                 
                 Data Counts:
                 - Courses: ${Object.keys(courses).length}
