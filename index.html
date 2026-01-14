@@ -913,7 +913,7 @@
         <div class="nav-tabs">
             <button class="tab-button active" data-tab="home">หน้าหลัก</button>
             <button class="tab-button" data-tab="booking" id="booking-tab" disabled>จองที่นั่ง</button>
-            <button class="tab-button" data-tab="help">วิธีใช้</button>
+            <!-- ลบแท็บ "วิธีใช้" ออกแล้ว -->
         </div>
 
         <!-- หน้าหลัก -->
@@ -1045,87 +1045,14 @@
             </div>
         </div>
 
-        <!-- วิธีใช้ -->
-        <div id="help" class="tab-content">
-            <h2><i class="fas fa-question-circle"></i> วิธีใช้ระบบ</h2>
-            
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
-                <div style="background: #e8f0fe; padding: 20px; border-radius: 8px;">
-                    <h3 style="color: var(--primary); margin-bottom: 15px;">
-                        <i class="fas fa-user-graduate"></i> สำหรับนักเรียน
-                    </h3>
-                    <ol style="margin-left: 20px; line-height: 1.8;">
-                        <li>เลือกหมวดหมู่วิชาจากปุ่มด้านบน</li>
-                        <li>เลือกวิชาจากรายการที่แสดง</li>
-                        <li>เลือกที่นั่งที่ว่าง (สีฟ้า) - คลิกเพื่อเลือก</li>
-                        <li>ยกเลิกการเลือก - คลิกซ้ำที่นั่งสีเขียว</li>
-                        <li>กรอกชื่อ-นามสกุลและห้องเรียน</li>
-                        <li>คลิกยืนยันการจองภายใน 30 วินาที</li>
-                        <li>บันทึกข้อมูลการจองที่ได้รับ</li>
-                    </ol>
-                    <p style="margin-top: 10px; color: var(--success);">
-                        <i class="fas fa-lightbulb"></i> ที่นั่งสีเขียว = กำลังเลือกอยู่ (คลิกซ้ำเพื่อยกเลิก)
-                    </p>
-                    <p style="margin-top: 5px; color: var(--reserving);">
-                        <i class="fas fa-lightbulb"></i> ที่นั่งสีส้ม = มีคนอื่นกำลังเลือกอยู่
-                    </p>
-                    <p style="margin-top: 5px; color: var(--booked);">
-                        <i class="fas fa-lightbulb"></i> ที่นั่งสีดำ = จองแล้ว
-                    </p>
-                </div>
-                
-                <div style="background: #f0f8f0; padding: 20px; border-radius: 8px;">
-                    <h3 style="color: var(--success); margin-bottom: 15px;">
-                        <i class="fas fa-chalkboard-teacher"></i> สำหรับอาจารย์
-                    </h3>
-                    <p>คลิกปุ่ม <a href="admin.html" style="color: var(--primary); text-decoration: underline;">ผู้ดูแลระบบ</a> ที่มุมขวาบน</p>
-                    <p>กรุณาเข้าสู่ระบบเพื่อใช้งานส่วนผู้ดูแล</p>
-                    <div class="admin-login-form" style="margin-top: 15px; padding: 15px; background: #e8f4ea; border-radius: 5px;">
-                        <h4 style="color: var(--success); margin-bottom: 10px;">เข้าสู่ระบบผู้ดูแล</h4>
-                        <p>ผู้ใช้: <strong>admin</strong></p>
-                        <p>รหัสผ่าน: <strong>admin123</strong></p>
-                        <a href="admin.html" class="btn btn-success" style="width: 100%; padding: 8px; margin-top: 10px;">
-                            <i class="fas fa-sign-in-alt"></i> ไปที่หน้าผู้ดูแล
-                        </a>
-                    </div>
-                    <p style="margin-top: 10px; color: var(--gray); font-size: 0.9rem;">
-                        <i class="fas fa-key"></i> รหัสผ่านเริ่มต้น: admin123
-                    </p>
-                </div>
-            </div>
-            
-            <div style="background: #fef7e0; padding: 20px; border-radius: 8px; margin-top: 20px;">
-                <h3 style="color: var(--warning); margin-bottom: 15px;">
-                    <i class="fas fa-lightbulb"></i> เคล็ดลับการใช้งาน
-                </h3>
-                <ul style="margin-left: 20px; line-height: 1.8;">
-                    <li>ข้อมูลอัพเดตแบบเรียลไทม์ ไม่ต้องรีเฟรชหน้า</li>
-                    <li>สามารถเลือกหลายที่นั่งพร้อมกันได้</li>
-                    <li><strong>คลิกซ้ำที่นั่งสีเขียวเพื่อยกเลิกการเลือก</strong></li>
-                    <li>ถ้าไม่เห็นวิชาแสดงขึ้นมา ให้รอสักครู่</li>
-                    <li>มีปัญหาการใช้งานให้แจ้งผู้ดูแลระบบ</li>
-                    <li>ที่นั่งสีส้มหมายถึงมีคนอื่นกำลังเลือกอยู่</li>
-                    <li>ที่นั่งสีดำหมายถึงจองแล้วโดยผู้อื่น</li>
-                    <li>ระบบจะแจ้งเตือนเมื่อมีคนกำลังเลือกที่นั่ง</li>
-                </ul>
-            </div>
-            
-            <div style="text-align: center; margin-top: 30px;">
-                <a href="admin.html" class="btn" style="padding: 15px 30px;">
-                    <i class="fas fa-user-shield"></i> ไปที่หน้าผู้ดูแลระบบ
-                </a>
-                <button class="btn btn-warning" id="btn-setup-db" style="padding: 15px 30px;">
-                    <i class="fas fa-database"></i> ตั้งค่าฐานข้อมูล
-                </button>
-            </div>
-        </div>
+        <!-- ลบหน้า "วิธีใช้" ออกแล้ว -->
 
         <footer>
             <p>ระบบจองที่นั่งเรียน &copy; 2023 - พัฒนาด้วย Firebase</p>
             <div class="footer-links">
                 <a href="./"><i class="fas fa-home"></i> หน้าหลัก</a>
-                <a href="#help"><i class="fas fa-question-circle"></i> วิธีใช้</a>
                 <a href="admin.html" id="footer-admin-link"><i class="fas fa-user-shield"></i> ผู้ดูแล</a>
+                <!-- ลบลิงก์ "วิธีใช้" ออกแล้ว -->
             </div>
         </footer>
     </div>
@@ -1243,7 +1170,6 @@
         const errorBox = document.getElementById('error-box');
         const errorDetails = document.getElementById('error-details');
         const btnDebug = document.getElementById('btn-debug');
-        const btnSetupDb = document.getElementById('btn-setup-db');
         const categoryButtonsContainer = document.getElementById('category-buttons');
         const categoryInfo = document.getElementById('category-info');
         const currentCategoryName = document.getElementById('current-category-name');
@@ -1268,7 +1194,6 @@
         closeMessageBtn.addEventListener('click', closeMessage);
         btnCloseMessage.addEventListener('click', closeMessage);
         btnDebug.addEventListener('click', showDebugInfo);
-        btnSetupDb.addEventListener('click', setupDatabase);
 
         // Initialize App
         async function initializeApp() {
@@ -1288,18 +1213,11 @@
                 // สร้างปุ่มหมวดหมู่
                 createCategoryButtons();
                 
-                // Setup real-time listeners
-                setupRealtimeListeners();
-                
-                // Initial load
-                await loadCourses();
-                await loadBookings();
+                // โหลดข้อมูลวิชาทั้งหมด (เบื้องต้น)
+                await loadCoursesInitial();
                 
                 // Start cleanup interval
                 setInterval(cleanupExpiredReservations, CLEANUP_INTERVAL);
-                
-                // Check if database needs setup
-                await checkDatabaseSetup();
                 
             } catch (error) {
                 console.error("Connection error:", error);
@@ -1312,12 +1230,8 @@
                     'สาเหตุ: ' + error.message + '\n\n' +
                     'กรุณาตรวจสอบ:\n' +
                     '1. การเชื่อมต่ออินเทอร์เน็ต\n' +
-                    '2. Firebase Project Configuration\n' +
-                    '3. หรือกดปุ่ม "ตั้งค่าฐานข้อมูล"'
+                    '2. Firebase Project Configuration'
                 );
-                
-                // Enable setup button
-                if (btnSetupDb) btnSetupDb.style.display = 'inline-block';
             }
         }
 
@@ -1393,214 +1307,95 @@
             categoryInfo.style.display = 'flex';
         }
 
-        // Check Database Setup
-        async function checkDatabaseSetup() {
-            try {
-                const coursesSnapshot = await db.collection('courses').limit(1).get();
-                
-                if (coursesSnapshot.empty) {
-                    showMessage('คำแนะนำ', 
-                        'ระบบยังไม่มีข้อมูลวิชา\n\n' +
-                        'กรุณา:\n' +
-                        '1. ไปที่หน้า "ผู้ดูแลระบบ"\n' +
-                        '2. เพิ่มวิชาใหม่\n' +
-                        'หรือกดปุ่ม "ตั้งค่าฐานข้อมูล" เพื่อสร้างข้อมูลตัวอย่าง'
-                    );
-                }
-            } catch (error) {
-                console.error('Error checking database:', error);
-            }
-        }
-
-        // Setup Database (สร้างข้อมูลตัวอย่าง)
-        async function setupDatabase() {
-            loadingText.textContent = 'กำลังตั้งค่าฐานข้อมูล...';
-            loadingModal.classList.add('active');
+        // Load Courses (เบื้องต้น - โหลดข้อมูลวิชาเท่านั้น)
+        async function loadCoursesInitial() {
+            if (!isConnected) return;
             
             try {
-                // สร้าง collection test
-                await db.collection('test_setup').add({
-                    timestamp: new Date().toISOString(),
-                    action: 'database_setup'
-                });
-                
-                // สร้างข้อมูลตัวอย่างตามหมวดหมู่ที่กำหนด
-                const sampleCourses = [
-                    // ศิลปะ
-                    { id: 'ART101', name: 'ศิลปะ ป.1', totalSeats: 25, instructor: 'ครูศิลป์ ศิลปกรรม', time: 'จันทร์ 09:00-10:00', description: 'ศิลปะพื้นฐานสำหรับนักเรียนชั้นประถม 1' },
-                    { id: 'ART201', name: 'ศิลปะ ป.2', totalSeats: 25, instructor: 'ครูศิลป์ ศิลปกรรม', time: 'จันทร์ 10:00-11:00', description: 'ศิลปะพื้นฐานสำหรับนักเรียนชั้นประถม 2' },
-                    { id: 'ART301', name: 'ศิลปะ ป.3', totalSeats: 25, instructor: 'ครูศิลป์ ศิลปกรรม', time: 'จันทร์ 11:00-12:00', description: 'ศิลปะพื้นฐานสำหรับนักเรียนชั้นประถม 3' },
-                    
-                    // ฟุตซอล
-                    { id: 'BALL101', name: 'ฟุตซอล ป.1-3', totalSeats: 20, instructor: 'ครูเอก ฟุตซอล', time: 'อังคาร 09:00-10:00', description: 'ฝึกทักษะฟุตซอลพื้นฐาน' },
-                    { id: 'BALL201', name: 'ฟุตซอล ป.4-6', totalSeats: 20, instructor: 'ครูเอก ฟุตซอล', time: 'อังคาร 10:00-11:00', description: 'ฝึกทักษะฟุตซอลระดับกลาง' },
-                    
-                    // ภาษาจีน
-                    { id: 'CN101', name: 'ภาษาจีนพื้นฐาน', totalSeats: 30, instructor: 'ครูหลิน จีน', time: 'พุธ 09:00-10:00', description: 'เรียนภาษาจีนพื้นฐาน พินอิน คำศัพท์ง่ายๆ' },
-                    { id: 'CN201', name: 'ภาษาจีนกลาง', totalSeats: 30, instructor: 'ครูหลิน จีน', time: 'พุธ 10:00-11:00', description: 'ภาษาจีนสำหรับการสนทนาในชีวิตประจำวัน' },
-                    
-                    // คอมพิวเตอร์
-                    { id: 'COM101', name: 'คอมพิวเตอร์เบื้องต้น', totalSeats: 30, instructor: 'ครูสมชาย คอมพิวเตอร์', time: 'พฤหัส 09:00-10:00', description: 'พื้นฐานการใช้คอมพิวเตอร์และอินเทอร์เน็ต' },
-                    { id: 'COM201', name: 'โปรแกรมมิ่งพื้นฐาน', totalSeats: 25, instructor: 'ครูสมชาย คอมพิวเตอร์', time: 'พฤหัส 10:00-11:00', description: 'เรียนรู้การเขียนโปรแกรมเบื้องต้น' },
-                    
-                    // นาฏศิลป์
-                    { id: 'D101', name: 'นาฏศิลป์ไทย', totalSeats: 20, instructor: 'ครูรำ นาฏศิลป์', time: 'ศุกร์ 09:00-10:00', description: 'เรียนรำไทยพื้นฐาน ท่ารำไทย' },
-                    { id: 'D201', name: 'นาฏศิลป์ร่วมสมัย', totalSeats: 20, instructor: 'ครูรำ นาฏศิลป์', time: 'ศุกร์ 10:00-11:00', description: 'การเต้นร่วมสมัยและการแสดง' },
-                    
-                    // คหกรรม
-                    { id: 'FOOD101', name: 'คหกรรมพื้นฐาน', totalSeats: 25, instructor: 'ครูปรุง อาหาร', time: 'จันทร์ 13:00-14:00', description: 'พื้นฐานการทำอาหารและงานบ้าน' },
-                    { id: 'FOOD201', name: 'อาหารไทย', totalSeats: 25, instructor: 'ครูปรุง อาหาร', time: 'จันทร์ 14:00-15:00', description: 'เรียนทำอาหารไทยเมนูต่างๆ' },
-                    
-                    // ดนตรีสากล
-                    { id: 'MUSIC101', name: 'ดนตรีสากลเบื้องต้น', totalSeats: 20, instructor: 'ครูดนตรี สากล', time: 'อังคาร 13:00-14:00', description: 'พื้นฐานดนตรีสากลและเครื่องดนตรี' },
-                    { id: 'MUSIC201', name: 'เปียโนพื้นฐาน', totalSeats: 15, instructor: 'ครูดนตรี สากล', time: 'อังคาร 14:00-15:00', description: 'เรียนเปียโนสำหรับผู้เริ่มต้น' },
-                    
-                    // ดนตรีไทย
-                    { id: 'MUSIC-T101', name: 'ดนตรีไทยเบื้องต้น', totalSeats: 20, instructor: 'ครูไทย ดนตรีไทย', time: 'พุธ 13:00-14:00', description: 'พื้นฐานดนตรีไทยและเครื่องดนตรีไทย' },
-                    { id: 'MUSIC-T201', name: 'ขิมพื้นฐาน', totalSeats: 15, instructor: 'ครูไทย ดนตรีไทย', time: 'พุธ 14:00-15:00', description: 'เรียนขิมสำหรับผู้เริ่มต้น' },
-                    
-                    // ว่ายน้ำ
-                    { id: 'SWIM101', name: 'ว่ายน้ำเบื้องต้น', totalSeats: 15, instructor: 'ครูว่าย น้ำ', time: 'พฤหัส 13:00-14:00', description: 'ว่ายน้ำสำหรับผู้เริ่มต้น ปลอดภัยกับน้ำ' },
-                    { id: 'SWIM201', name: 'ว่ายน้ำท่ามาตรฐาน', totalSeats: 15, instructor: 'ครูว่าย น้ำ', time: 'พฤหัส 14:00-15:00', description: 'ว่ายน้ำท่ามาตรฐานและการช่วยเหลือ' },
-                    
-                    // งานประดิษฐ์
-                    { id: 'W101', name: 'งานประดิษฐ์เบื้องต้น', totalSeats: 25, instructor: 'ครูประดิษฐ์ งานฝีมือ', time: 'ศุกร์ 13:00-14:00', description: 'พื้นฐานงานประดิษฐ์และงานฝีมือ' },
-                    { id: 'W201', name: 'ประดิษฐ์ของเล่น', totalSeats: 25, instructor: 'ครูประดิษฐ์ งานฝีมือ', time: 'ศุกร์ 14:00-15:00', description: 'การประดิษฐ์ของเล่นจากวัสดุเหลือใช้' }
-                ];
-                
-                // สร้าง collection หลัก
-                const collections = ['courses', 'bookings', 'seat_reservations'];
-                for (const collectionName of collections) {
-                    const collectionRef = db.collection(collectionName);
-                    const snapshot = await collectionRef.limit(1).get();
-                    if (snapshot.empty) {
-                        console.log(`Creating collection: ${collectionName}`);
-                    }
-                }
-                
-                // เพิ่มข้อมูลตัวอย่าง
-                for (const course of sampleCourses) {
-                    await db.collection('courses').doc(course.id).set({
-                        name: course.name,
-                        totalSeats: course.totalSeats,
-                        instructor: course.instructor,
-                        time: course.time,
-                        description: course.description,
-                        createdAt: new Date().toISOString()
-                    });
-                }
-                
-                loadingModal.classList.remove('active');
-                showMessage('สำเร็จ', 
-                    'ตั้งค่าฐานข้อมูลสำเร็จ!\n\n' +
-                    'สร้างข้อมูลตัวอย่างครบทุกหมวดหมู่:\n' +
-                    '- ศิลปะ (ART) 3 วิชา\n' +
-                    '- ฟุตซอล (BALL) 2 วิชา\n' +
-                    '- ภาษาจีน (CN) 2 วิชา\n' +
-                    '- คอมพิวเตอร์ (COM) 2 วิชา\n' +
-                    '- นาฏศิลป์ (D) 2 วิชา\n' +
-                    '- คหกรรม (FOOD) 2 วิชา\n' +
-                    '- ดนตรีสากล (MUSIC) 2 วิชา\n' +
-                    '- ดนตรีไทย (MUSIC-T) 2 วิชา\n' +
-                    '- ว่ายน้ำ (SWIM) 2 วิชา\n' +
-                    '- งานประดิษฐ์ (W) 2 วิชา\n\n' +
-                    'ระบบพร้อมใช้งานแล้ว'
-                );
-                
-                // โหลดข้อมูลใหม่
-                await loadCourses();
-                
-            } catch (error) {
-                console.error('Setup error:', error);
-                loadingModal.classList.remove('active');
-                showError('ตั้งค่าฐานข้อมูลล้มเหลว', 
-                    'ไม่สามารถตั้งค่าฐานข้อมูลได้\n\n' +
-                    'สาเหตุ: ' + error.message + '\n\n' +
-                    'กรุณาตรวจสอบ:\n' +
-                    '1. Firebase Security Rules\n' +
-                    '2. Project Configuration\n' +
-                    '3. Internet Connection'
-                );
-            }
-        }
-
-        // Setup Real-time Listeners
-        function setupRealtimeListeners() {
-            // Listen for course changes
-            db.collection('courses').onSnapshot(snapshot => {
-                if (!isConnected) return;
-                
+                const snapshot = await db.collection('courses').get();
                 courses = {};
                 snapshot.forEach(doc => {
                     courses[doc.id] = { id: doc.id, ...doc.data() };
                 });
                 renderCourses();
                 updateCategoryInfo();
-                updateLastUpdateTime();
-            }, error => {
-                console.error('Courses listener error:', error);
-                showError('Courses listener error', error.message);
-            });
+            } catch (error) {
+                console.error('Error loading courses:', error);
+                showError('Load Courses Error', error.message);
+            }
+        }
 
-            // Listen for booking changes
-            db.collection('bookings').onSnapshot(snapshot => {
-                if (!isConnected) return;
+        // Load Bookings สำหรับวิชาที่เลือก (โหลดเฉพาะเมื่อเลือกวิชา)
+        async function loadBookingsForCourse() {
+            if (!isConnected || !selectedCourse) return;
+            
+            try {
+                const snapshot = await db.collection('bookings')
+                    .where('courseId', '==', selectedCourse)
+                    .get();
                 
                 bookings = {};
                 snapshot.forEach(doc => {
                     bookings[doc.id] = { id: doc.id, ...doc.data() };
                 });
-                renderCourses();
-                if (selectedCourse) {
-                    renderSeats();
-                }
-                updateLastUpdateTime();
-            }, error => {
-                console.error('Bookings listener error:', error);
-                showError('Bookings listener error', error.message);
-            });
+                
+                // Setup real-time listeners สำหรับวิชานี้
+                setupRealtimeListenersForCourse();
+                
+            } catch (error) {
+                console.error('Error loading bookings:', error);
+                showError('Load Bookings Error', error.message);
+            }
+        }
 
+        // Setup Real-time Listeners สำหรับวิชาที่เลือก
+        function setupRealtimeListenersForCourse() {
+            // Stop any existing listeners
+            if (seatReservationsListener) {
+                seatReservationsListener();
+            }
+            
             // Listen for seat reservations - REAL-TIME UPDATES
-            seatReservationsListener = db.collection('seat_reservations').onSnapshot(snapshot => {
-                if (!isConnected) return;
-                
-                seatReservations = {};
-                let activeReservations = 0;
-                const currentUserId = getUserId();
-                const now = new Date();
-                
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const reservationTime = new Date(data.reservedAt);
-                    const timeDiff = (now - reservationTime) / 1000;
+            seatReservationsListener = db.collection('seat_reservations')
+                .where('courseId', '==', selectedCourse)
+                .onSnapshot(snapshot => {
+                    if (!isConnected) return;
                     
-                    if (timeDiff < RESERVATION_TIMEOUT_SECONDS) {
-                        seatReservations[doc.id] = { id: doc.id, ...data };
-                        if (data.userId !== currentUserId) {
-                            activeReservations++;
+                    seatReservations = {};
+                    let activeReservations = 0;
+                    const currentUserId = getUserId();
+                    const now = new Date();
+                    
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        const reservationTime = new Date(data.reservedAt);
+                        const timeDiff = (now - reservationTime) / 1000;
+                        
+                        if (timeDiff < RESERVATION_TIMEOUT_SECONDS) {
+                            seatReservations[doc.id] = { id: doc.id, ...data };
+                            if (data.userId !== currentUserId) {
+                                activeReservations++;
+                            }
                         }
+                    });
+                    
+                    // Update active users count
+                    updateActiveUsers(snapshot.size);
+                    
+                    // Show/hide reservation info
+                    if (activeReservations > 0) {
+                        showReservationInfo(activeReservations);
+                    } else {
+                        hideReservationInfo();
                     }
-                });
-                
-                // Update active users count
-                updateActiveUsers(snapshot.size);
-                
-                // Show/hide reservation info
-                if (activeReservations > 0 && selectedCourse) {
-                    showReservationInfo(activeReservations);
-                } else {
-                    hideReservationInfo();
-                }
-                
-                if (selectedCourse) {
+                    
                     renderSeats();
-                }
-                
-                updateLastUpdateTime();
-            }, error => {
-                console.error('Seat reservations listener error:', error);
-                showError('Reservations listener error', error.message);
-            });
+                    updateLastUpdateTime();
+                    
+                }, error => {
+                    console.error('Seat reservations listener error:', error);
+                    showError('Reservations listener error', error.message);
+                });
         }
 
         // Update Active Users
@@ -1705,40 +1500,6 @@
             hideError();
         }
 
-        // Load Courses
-        async function loadCourses() {
-            if (!isConnected) return;
-            
-            try {
-                const snapshot = await db.collection('courses').get();
-                courses = {};
-                snapshot.forEach(doc => {
-                    courses[doc.id] = { id: doc.id, ...doc.data() };
-                });
-                renderCourses();
-                updateCategoryInfo();
-            } catch (error) {
-                console.error('Error loading courses:', error);
-                showError('Load Courses Error', error.message);
-            }
-        }
-
-        // Load Bookings
-        async function loadBookings() {
-            if (!isConnected) return;
-            
-            try {
-                const snapshot = await db.collection('bookings').get();
-                bookings = {};
-                snapshot.forEach(doc => {
-                    bookings[doc.id] = { id: doc.id, ...doc.data() };
-                });
-            } catch (error) {
-                console.error('Error loading bookings:', error);
-                showError('Load Bookings Error', error.message);
-            }
-        }
-
         // Render Courses - แก้ไขให้แสดงเฉพาะหมวดหมู่ที่เลือก
         function renderCourses() {
             if (!coursesList) return;
@@ -1751,13 +1512,8 @@
                         <i class="fas fa-book"></i>
                         <h3>ยังไม่มีวิชาในระบบ</h3>
                         <p>กรุณาเพิ่มวิชาในหน้า "ผู้ดูแลระบบ"</p>
-                        <button class="btn btn-success" id="btn-create-sample" style="margin-top: 20px;">
-                            <i class="fas fa-plus"></i> สร้างข้อมูลตัวอย่าง
-                        </button>
                     </div>
                 `;
-                
-                document.getElementById('btn-create-sample')?.addEventListener('click', setupDatabase);
                 return;
             }
             
@@ -1790,12 +1546,9 @@
             for (const courseId of filteredCourses) {
                 const course = courses[courseId];
                 
+                // จำนวนที่นั่งจอง (คำนวณเบื้องต้น)
                 let bookedCount = 0;
-                for (const bookingId in bookings) {
-                    if (bookings[bookingId].courseId === courseId) {
-                        bookedCount++;
-                    }
-                }
+                // เนื่องจากยังไม่ได้โหลด bookings เราจะใช้ค่า 0 ไว้ก่อน
                 
                 const availableSeats = course.totalSeats - bookedCount;
                 const percentage = Math.round((bookedCount / course.totalSeats) * 100);
@@ -1846,7 +1599,7 @@
         }
 
         // Select Course
-        function selectCourse(courseId) {
+        async function selectCourse(courseId) {
             if (!isConnected) {
                 showError('การเชื่อมต่อ', 'ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้');
                 return;
@@ -1860,28 +1613,42 @@
                 return;
             }
             
-            courseNameElement.textContent = course.name;
-            courseDescriptionElement.textContent = course.description || '';
-            courseCodeElement.textContent = courseId;
-            courseInstructorElement.textContent = course.instructor || '-';
-            courseTimeElement.textContent = course.time || '-';
-            totalSeatsCountElement.textContent = course.totalSeats;
+            // โหลดข้อมูลการจองสำหรับวิชานี้
+            loadingText.textContent = 'กำลังโหลดข้อมูลการจอง...';
+            loadingModal.classList.add('active');
             
-            bookingTab.disabled = false;
-            openTab('booking');
-            
-            selectedSeats = [];
-            selectedSeatsDisplay.textContent = 'ยังไม่มีการเลือกที่นั่ง';
-            selectedSeatsDisplay.style.background = '#e8f4ea';
-            selectedSeatsDisplay.style.color = '#34a853';
-            studentNameInput.value = '';
-            studentClassInput.value = '';
-            
-            clearReservation();
-            confirmationBox.classList.remove('active');
-            hideError();
-            
-            renderSeats();
+            try {
+                await loadBookingsForCourse();
+                
+                courseNameElement.textContent = course.name;
+                courseDescriptionElement.textContent = course.description || '';
+                courseCodeElement.textContent = courseId;
+                courseInstructorElement.textContent = course.instructor || '-';
+                courseTimeElement.textContent = course.time || '-';
+                totalSeatsCountElement.textContent = course.totalSeats;
+                
+                bookingTab.disabled = false;
+                openTab('booking');
+                
+                selectedSeats = [];
+                selectedSeatsDisplay.textContent = 'ยังไม่มีการเลือกที่นั่ง';
+                selectedSeatsDisplay.style.background = '#e8f4ea';
+                selectedSeatsDisplay.style.color = '#34a853';
+                studentNameInput.value = '';
+                studentClassInput.value = '';
+                
+                clearReservation();
+                confirmationBox.classList.remove('active');
+                hideError();
+                
+                renderSeats();
+                
+            } catch (error) {
+                console.error('Error loading course data:', error);
+                showError('Error', 'ไม่สามารถโหลดข้อมูลวิชาได้');
+            } finally {
+                loadingModal.classList.remove('active');
+            }
         }
 
         // Render Seats - WITH REAL-TIME RESERVATION UPDATES
@@ -1896,6 +1663,7 @@
             let bookedCount = 0;
             const bookedSeats = {};
             
+            // ตรวจสอบการจองจากข้อมูล bookings
             for (const bookingId in bookings) {
                 const booking = bookings[bookingId];
                 if (booking.courseId === selectedCourse) {
@@ -1912,6 +1680,7 @@
             const currentUserId = getUserId();
             const now = new Date();
             
+            // ตรวจสอบการจองชั่วคราวจาก seatReservations
             for (const reservationId in seatReservations) {
                 const reservation = seatReservations[reservationId];
                 if (reservation.courseId === selectedCourse) {
@@ -1934,6 +1703,7 @@
                 availableSeatsCountElement.textContent = availableSeats;
             }
             
+            // สร้างที่นั่ง
             for (let i = 1; i <= course.totalSeats; i++) {
                 const seat = document.createElement('div');
                 seat.className = 'seat';
@@ -2277,8 +2047,8 @@
                     studentNameInput.value = '';
                     studentClassInput.value = '';
                     
-                    renderCourses();
-                    renderSeats();
+                    // อัพเดตข้อมูล bookings ใหม่
+                    await loadBookingsForCourse();
                     
                 } else if (bookingIds.length > 0) {
                     const successSeats = bookingIds.map(b => b.seatNumber).join(', ');
